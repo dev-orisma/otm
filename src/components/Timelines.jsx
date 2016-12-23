@@ -8,6 +8,7 @@ var _ = require('lodash')
 
 
 
+
 class Timelines extends Component {
 	constructor(props) {
 		super(props)
@@ -48,7 +49,7 @@ class Timelines extends Component {
 			currentPid:0})
 	}
 
-	selectProject(item){
+	selectProject(item){ 
 		CM.listTask(this.props.socket,item.d.id,(rs)=>{
 			if(!rs){
 
@@ -78,10 +79,10 @@ class Timelines extends Component {
 				}
 				return 0;
 			});
+	 
 			this.setState({currentPid:item.d.id,userList:item.m,taskAssignList:ac})
 
 		})
-
 	}
 
 	_updateEndTime(data){
@@ -93,7 +94,11 @@ class Timelines extends Component {
 		this.selectProject(items[index])
 
 	}
-	resizeItem(id,time){
+	resizeItem(id,time, newGroupOrder,data,inx){
+		
+		let ac = Object.assign([], this.state.taskAssignList) 
+		ac[inx] = data 
+		this.setState({taskAssignList:ac})
 		CM.changeEndTime(this.props.socket,this.state.currentPid,id,time,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
@@ -109,47 +114,46 @@ class Timelines extends Component {
 			return "btn-select-project"
 		}
 	}
-	moveItem(itemId, data){
+	moveItem(itemId, dragTime, newGroupOrder,data,inx){ 
+		let ac = Object.assign([], this.state.taskAssignList) 
+		ac[inx] = data 
+		this.setState({taskAssignList:ac})
 		CM.changePosition(this.props.socket,this.state.currentPid,itemId,data.start_time,data.end_time,data.group,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}
 		})
-	}
+	} 
 
 	render() {
-		var items = this.state.projectList
-
+		var items = this.state.projectList 
 		return (
 			<div>
-			<div id="project-list">
-			<div id="btn-all-project">All Projects</div>
-			{ items.map((item, i) =>
-				<div className={this.activeProject(item.d.id)} onClick={this.selectProject.bind(this,item)} key={"list-project-"+i}><i className="material-icons tiny">library_books</i> {item.d.title}</div>
-				)}
-			</div>
-			<Timeline groups={this.state.userList}
-			items={this.state.taskAssignList}
-			defaultTimeStart={moment().add(-7, 'day')}
-			defaultTimeEnd={moment().add(7, 'day')}
-			onItemResize={this.resizeItem.bind(this)}
-			onItemMove={this.moveItem.bind(this)}
-			stackItems={true}
-      timeSteps={{
-      second: 0,
-      minute: 0,
-      hour: 6,
-      day: 1,
-      month: 1,
-      year: 1
-    }}
-			dragSnap={60 * 60 * 1000*6}
+				<div id="project-list">
+				<div id="btn-all-project">All Projects</div>
+				{ items.map((item, i) =>
+					<div className={this.activeProject(item.d.id)} onClick={this.selectProject.bind(this,item)} key={"list-project-"+i}><i className="material-icons tiny">library_books</i> {item.d.title}</div>
+					)}
+				</div>
 
-			/>
+				<Timeline groups={this.state.userList}
+				items={this.state.taskAssignList}
+				defaultTimeStart={moment().add(-7, 'day')}
+				defaultTimeEnd={moment().add(7, 'day')} 
+				onItemResize={this.resizeItem.bind(this)}
+				onItemMove={this.moveItem.bind(this)}
+				stackItems={true}
+			    timeSteps={{
+			      second: 0,
+			      minute: 0,
+			      hour: 6,
+			      day: 1,
+			      month: 1,
+			      year: 1
+			    }}
+				dragSnap={60 * 60 * 1000*6}
 
-			<div>
-
-			</div>
+				/>
 
 			</div>
 
