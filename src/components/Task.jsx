@@ -62,7 +62,9 @@ class Task extends Component {
 			if(!rs){
 
 			}else{
-				this.setState({listTasks:rs });
+				var {listTasks} = this.state
+				listTasks = rs;
+				this.setState({listTasks});
 			}
 		})
 	}
@@ -117,6 +119,7 @@ class Task extends Component {
 					$(event['target']).sortable('cancel');
 					this.setState({ listTasks: store_state });
 				}else{
+					// this.props.projectsListCard();
 					this.setState({looped:false})
 				}
 				this.setState({loading:false });
@@ -146,6 +149,7 @@ class Task extends Component {
 					$(event['target']).sortable('cancel');
 					this.setState({ listTasks: store_state });
 				}else{
+					// this.props.projectsListCard();
 					this.setState({looped:false})
 				}
 				this.setState({loading:false });
@@ -193,7 +197,7 @@ class Task extends Component {
 				<div className={"task-box " + task_item.status} data-id={task_item.id} id={"task-"+task_item.id} key={i}>
 				<Link to={`/task/${task_item.id}`}>
 				<div className="task-assign">
-					<Avatar name={task_item.user_name} avatar={task_item.user_avatar} color={task_item.user_color}/>
+				<Avatar name={task_item.user_name} avatar={task_item.user_avatar} color={task_item.user_color}/>
 				</div>
 
 				<div className="task-title">{task_item.title}</div>

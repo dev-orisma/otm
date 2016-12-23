@@ -44,8 +44,8 @@ class Project extends Component {
 
 		}
 	}
+
 	componentDidMount(){
-		// window.addEventListener('mousedown', this.inputClick.bind(this), false);
 		$( "#card-sort" ).sortable({update: this.handleSortCardUpdate.bind(this)
 		}).disableSelection();
 		this.projectsListCard.bind(this)()
@@ -303,7 +303,7 @@ class Project extends Component {
 						<div className="card-title">{card_item.title}</div>
 						<div className="card-menu" onClick={this.editCard.bind(this,card_item.id)}><i className="material-icons tiny">mode_edit</i></div>
 					</div>
-					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} RerenderProject={this.RerenderProject.bind(this)} cardId={card_item.id} /></div>
+					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} projectsListCard={this.projectsListCard.bind(this)} cardId={card_item.id} /></div>
 				</div>
 				)}
 			</div>
