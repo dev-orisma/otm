@@ -446,12 +446,7 @@ class TaskDetail extends Component {
             { this.state.comments.map((c_item,ic)=>
                 <div className="activity-item" key={"comment-"+this.state.taskId+"-"+ic}>
                 <div className="activity-avatar">
-
-                {c_item["u.Avatar"]
-                ? <img  src={"/uploads/"+c_item["u.Avatar"]} className="avatar-mini circle responsive-img" width="40" height="40" />
-                : <img src={"https://placeholdit.imgix.net/~text?txtsize=15&txt="+c_item["u.Name"].charAt(0).toUpperCase()+"&w=40&h=40&txttrack=0&txtclr=000000&bg="+ c_item["u.Color"]} className="circle  responsive-img" />
-            }
-
+                <Avatar name={c_item["u.Name"]} avatar={c_item["u.Avatar"]} color={c_item['ua.Color']} />
             </div>
             <div className="activity-detail">
             <div>Posted : {timeConverterWithTime(c_item["c.date"])}</div>
