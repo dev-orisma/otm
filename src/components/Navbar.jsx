@@ -25,7 +25,7 @@ const MatchWhenAuthorized = ({ component: Component, ...rest }) => (
 		auth.loggedIn() ? (
 			<Component {...props} {...rest} socket={socket} />
 			) : (
-			<Login socket={socket} />
+			<Login socket={socket} title="Login page"/>
 			)
 			)}/>
 	)
