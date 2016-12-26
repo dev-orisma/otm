@@ -1589,3 +1589,7 @@ hr{
 	color: #fff;
 	font-size: 16px;
 }
+[contenteditable]:empty:before{
+  content: attr(placeholder);
+  display: block; /* For Firefox */
+}

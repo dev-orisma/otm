@@ -71,9 +71,9 @@ render() {
  var { tagName, html, onChange, isReset, onReset,className,disabled,...props } = this.props;
 
  var htmlCache = this.state.htmlCache;
- return (<div>{this.props.disabled?<div ref={(e) => this.htmlEl = e} className={className} onInput={this.emitChange.bind(this)} onBlur={this.outBox.bind(this)} contentEditable="true" dangerouslySetInnerHTML={{__html:html}}></div>
+ return (<div>{this.props.disabled?<div ref={(e) => this.htmlEl = e} className={className} onInput={this.emitChange.bind(this)} onBlur={this.outBox.bind(this)} placeholder="Enter text here..." contentEditable="true" dangerouslySetInnerHTML={{__html:html}}></div>
   :
-  <div ref={(e) => this.htmlEl = e} className={className}  onDoubleClick={this.activeBox.bind(this)} contentEditable="false" dangerouslySetInnerHTML={{__html:htmlCache}}></div>
+  <div ref={(e) => this.htmlEl = e} className={className}  onDoubleClick={this.activeBox.bind(this)} contentEditable="false" placeholder="Enter text here..." dangerouslySetInnerHTML={{__html:htmlCache}}></div>
 }</div>);
 }
 }
