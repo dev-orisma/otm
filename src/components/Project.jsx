@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import auth from './Module/Auth';
 import {Link} from 'react-router';
 import projects from './Module/Project'
+import Tasks from './Module/Task'
 import Task from './Task'
 import PopupPage from './PopupPage'
+import TaskDetail from './TaskDetail'
 import Router from 'react-router/BrowserRouter'
 import Match from 'react-router/Match'
 import Redirect from 'react-router/Redirect'
@@ -42,8 +44,8 @@ class Project extends Component {
 
 		}
 	}
+
 	componentDidMount(){
-		// window.addEventListener('mousedown', this.inputClick.bind(this), false);
 		$( "#card-sort" ).sortable({update: this.handleSortCardUpdate.bind(this)
 		}).disableSelection();
 		this.projectsListCard.bind(this)()
@@ -55,7 +57,16 @@ class Project extends Component {
 		cal_list();
 	}
 	componentWillMount() {
-
+		if(this.state.projectId == ""){
+			Tasks.get(this.props.socket,"",this.props.params.taskId,(rs)=>{
+				if(!rs){
+					return Materialize.toast("เกิดข้อผิดพลาด ไม่พบ Task นี้", 4000)
+				}else{
+					this.setState({projectId:rs[0]["ID(p)"]})
+					this.projectsListCard.bind(this)()
+				}
+			})
+		}
 	}
 	componentDidUpdate(prevProps, prevState){
 		cal_list();
@@ -255,6 +266,7 @@ class Project extends Component {
 		event.preventDefault()
 	}
 	RerenderProject(pid){
+		this.setState({projectId:pid});
 		this.projectsListCard.bind(this)()
 	}
 	render() {
@@ -291,7 +303,7 @@ class Project extends Component {
 						<div className="card-title">{card_item.title}</div>
 						<div className="card-menu" onClick={this.editCard.bind(this,card_item.id)}><i className="material-icons tiny">mode_edit</i></div>
 					</div>
-					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} RerenderProject={this.RerenderProject.bind(this)} cardId={card_item.id} /></div>
+					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} projectsListCard={this.projectsListCard.bind(this)} cardId={card_item.id} /></div>
 				</div>
 				)}
 			</div>
@@ -363,7 +375,7 @@ class Project extends Component {
 					</div>
 					:null
 				}
-				<MatchWhenAuthorized pattern="/task/:taskId" onRender={this.RerenderProject.bind(this)} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} component={PopupPage} />
+				<MatchWhenAuthorized pattern="/task/:taskId" onRender={this.RerenderProject.bind(this)} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} component={TaskDetail} />
 				</div>
 				</Router>
 				);
