@@ -17,7 +17,7 @@ class Register extends Component {
 			if (!loggedIn){
 				return Materialize.toast("อีเมล์นี้ถูกใช้งานแล้ว", 4000)
 			}else{
-				this.context.router.transitionTo('/dashboard')
+				this.context.router.transitionTo('/')
 			}
 
 		})
