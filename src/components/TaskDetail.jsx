@@ -7,6 +7,7 @@ import Tags from './Tags'
 import Loading from './Loading';
 import Move from './Move';
 import Avatar from './Avatar';
+import ContentEditable  from "./ContentEditable";
 var Datetime = require('react-datetime');
 var Dropzone = require('react-dynamic-dropzone');
 
@@ -36,7 +37,8 @@ class TaskDetail extends Component {
             allTags:[],
             showTag:false,
             loading:true,
-            task_status:"active"
+            task_status:"active",
+            editDetail:false
         }
         this._hideDropdown = this._hideDropdown.bind(this);
         this.onDrop = this.onDrop.bind(this);
@@ -384,146 +386,149 @@ class TaskDetail extends Component {
             return <div id="closePopup"><Link to={`/project/${this.state.projectId}`}>×</Link></div>
         }
     }
+    changeEdit(data){
+        this.setState({editDetail:data});
+    }
     render() {
         return (
             <div style={{display:this.checkTaskId()}}>
-                <div id="inner" className="element-animation">
-                    {this.closeTaskDetail()}
-                    <div id="menuPopup">
-                        <StatusAction status={this.state.task_status} changeStatus={this.statusTask.bind(this)}/>
-                    </div>
-                    <div className="clear"></div>
-                    <hr/>
-                    <div className="row">
-                        <div className="col s8">
-                            <textarea className="hiddenInput title" ref="taskTitle" value={this.state.taskData["t.title"]} onChange={this.changeTitle.bind(this)} onBlur={this.updateTask.bind(this)}></textarea>
-                            <textarea className="hiddenInput detail" value={this.state.taskData["t.detail"]} onChange={this.changeDetail.bind(this)} placeholder="No detail." onBlur={this.updateTask.bind(this)}></textarea>
-                            <div id="todoList">
-                                {this.state.showTodo?
-                                    <Todo tid={this.state.taskId} socket={this.state.socket}/>
-                                    :
-                                    <div className="addSubject" onClick={this.showTodoList.bind(this)}><i className="material-icons">note_add</i> Add Checklist Itme</div>
-                                }
-
-                            </div>
-                            <div id="fileList">
-                                <div className="addSubject" onClick={this.onOpenClick}><i className="material-icons">note_add</i> Attachment</div>
-                                <Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
-                                    <div>Try dropping some files here, or click to select files to upload.</div>
-                                </Dropzone>
-                                <div id="attachment-detail">
-                                    { this.state.attachments.map((at_item,i)=>
-
-                                            <div id={"att-" + at_item.id} className="attachemnt-item" key={"attachemnt-"+this.state.taskId+"-"+i}>
-                                                <a href={"/uploads/attachment/"+at_item["a.file_name"]} target="_blank">
-                                                    { at_item["a.file_type"] == "png" || at_item["a.file_type"] == "jpg" || at_item["a.file_type"] == "jpeg" || at_item["a.file_type"] == "gif"?
-                                                        <div className="img-picture img-100" style={{backgroundImage: 'url(/uploads/attachment/' + at_item["a.file_name"] + ')'}}></div>
-                                                        : <div className={"img-file img-100 img-"+at_item["a.file_type"]}></div>
-                                                    }
-                                                </a>
-                                                <div className="attachment-rm circle" onClick={this.onAttachmentRemoveClick.bind(this,at_item.id,at_item["a.file_name"])} data-id={at_item.id}>x</div>
-                                            </div>
-                                        // {i == 0 ? <div className="card-action"></div> : <div></div>}
-                                    )}
-                                    <div className="card-action"></div>
-                                </div>
-                            </div>
-                            <div id="activity">
-                                <h5>Activity</h5>
-                                <div id="inputComment">
-                                    <form onSubmit={this.submitComment.bind(this)}>
-                                        <textarea type="text" className="inputComment" ref="commentInput" placeholder="Enter comment" />
-                                        <button type="submit" className="btn-flat green right">Say it!</button>
-                                    </form>
-                                    <div className="clear"></div>
-                                </div>
-                                <div id="commetnList">
-                                    { this.state.comments.map((c_item,ic)=>
-                                        <div className="activity-item" key={"comment-"+this.state.taskId+"-"+ic}>
-                                            <div className="activity-avatar">
-
-                                                {c_item["u.Avatar"]
-                                                    ? <img  src={"/uploads/"+c_item["u.Avatar"]} className="avatar-mini circle responsive-img" width="40" height="40" />
-                                                    : <img src={"https://placeholdit.imgix.net/~text?txtsize=15&txt="+c_item["u.Name"].charAt(0).toUpperCase()+"&w=40&h=40&txttrack=0&txtclr=000000&bg="+ c_item["u.Color"]} className="circle  responsive-img" />
-                                                }
-
-                                            </div>
-                                            <div className="activity-detail">
-                                                <div>Posted : {timeConverterWithTime(c_item["c.date"])}</div>
-                                                {c_item["c.text"]}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                                <div>
-
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col s4 bg-gray">
-                        	<Move socket={this.props.socket} taskId={this.state.taskId}/>
-
-
-
-
-                            <Dropdown trigger={
-                                <div className="userAssigned">
-                                    <div>Assigned to </div>
-                                    <Avatar name={this.state.taskData['ua.Name']} avatar={this.state.taskData['ua.Avatar']} color={this.state.taskData['ua.Color']} />
-                                    <div>{this.state.taskData['ua.Name']}</div>
-                                </div>
-                            }>
-                                { this.state.listUsers.map((user, i) =>
-                                    <NavItem key={'asu-'+i} onClick={this.activeListUser.bind(this,user)}>
-                                        {user.name}
-                                    </NavItem>
-                                )}
-                            </Dropdown>
-
-
-                            <div className="rightBarItem">
-                                <strong>Start Date : </strong>
-                                <Datetime isValidDate={this.validDateStart.bind(this)} onChange={this.selectStartDate.bind(this)} value={moment.unix(Math.round(parseInt(this.state.taskData['t.startDate']) / 1000))} />
-                                <strong>Due Date : </strong>
-                                <Datetime isValidDate={this.validDateEnd.bind(this)} onChange={this.selectEndDate.bind(this)} value={moment.unix(Math.round(parseInt(this.state.taskData['t.endDate']) / 1000))} />
-                            </div>
-                            <div className="rightBarItem" id="tags"
-                                 onMouseOver={this._handleFocus.bind(this)}
-                                 onMouseLeave={this._handleBlur.bind(this)}
-                                 onClick={this._toggleDropdown.bind(this)}>
-                                <strong>Tags</strong>
-                                <div>
-                                    {this.state.currentTags.map((tag,i)=>
-                                        <div key={"color-"+i} className={"tagColor "+tag["l.color"]} style={{backgroundColor:tag["l.bg_color"],color:tag["l.f_color"]}}>{tag["l.text"]}</div>
-                                    )}
-                                    <div className="clear"></div>
-                                </div>
-
-                                {
-                                    this.state.dropdownIsVisible &&
-                                    <div id="tagList" className="fade-animation" onMouseOver={this._handleFocus.bind(this)}
-                                         onMouseLeave={this._handleBlur.bind(this)}>
-                                        <div id="btn-manage-tag" onClick={this.openTags.bind(this)}>[Manage Tags]</div>
-                                        {this.state.allTags.map((taga,ti)=>
-                                            <div className={this.classTag(taga['ID(t)'])} key={"tag-all-"+ti+taga["ID(t)"]} onClick={this.clickTag.bind(this,taga["ID(t)"],taga["t.color"],taga["t.text"],taga["t.bg_color"],taga["t.f_color"])}>
-                                                <div className={"tagColor "+taga['t.color']} style={{backgroundColor:taga['t.bg_color'],color:taga['t.f_color']}}>{taga["t.text"]}</div>
-                                                <div className="clear"></div>
-                                            </div>
-                                        )}
-                                    </div>
-                                }
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-                <div id="popup" className="fade-animation">
-                </div>
-                {this.state.loading?<Loading loading={this.state.loading}/>:null}
-                {this.state.showTag?<Tags projectId={this.state.projectId} socket={this.props.socket} closeTags={this.closeTags.bind(this)} />:null}
+            <div id="inner" className="element-animation">
+            {this.closeTaskDetail()}
+            <div id="menuPopup">
+            <StatusAction status={this.state.task_status} changeStatus={this.statusTask.bind(this)}/>
             </div>
-        );
-    }
+            <div className="clear"></div>
+            <hr/>
+            <div className="row">
+            <div className="col s8">
+            <textarea className="hiddenInput title" ref="taskTitle" value={this.state.taskData["t.title"]} onChange={this.changeTitle.bind(this)} onBlur={this.updateTask.bind(this)}></textarea>
+            <ContentEditable  className="hiddenInput detail" html={this.state.taskData["t.detail"]} changeEdit={this.changeEdit.bind(this)} disabled={this.state.editDetail} onChange={this.changeDetail.bind(this)}  onBlur={this.updateTask.bind(this)}/>
+            <div id="todoList">
+            {this.state.showTodo?
+                <Todo tid={this.state.taskId} socket={this.state.socket}/>
+                :
+                <div className="addSubject" onClick={this.showTodoList.bind(this)}><i className="material-icons">note_add</i> Add Checklist Itme</div>
+            }
+
+            </div>
+            <div id="fileList">
+            <div className="addSubject" onClick={this.onOpenClick}><i className="material-icons">note_add</i> Attachment</div>
+            <Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
+            <div>Try dropping some files here, or click to select files to upload.</div>
+            </Dropzone>
+            <div id="attachment-detail">
+            { this.state.attachments.map((at_item,i)=>
+
+                <div id={"att-" + at_item.id} className="attachemnt-item" key={"attachemnt-"+this.state.taskId+"-"+i}>
+                <a href={"/uploads/attachment/"+at_item["a.file_name"]} target="_blank">
+                { at_item["a.file_type"] == "png" || at_item["a.file_type"] == "jpg" || at_item["a.file_type"] == "jpeg" || at_item["a.file_type"] == "gif"?
+                <div className="img-picture img-100" style={{backgroundImage: 'url(/uploads/attachment/' + at_item["a.file_name"] + ')'}}></div>
+                : <div className={"img-file img-100 img-"+at_item["a.file_type"]}></div>
+            }
+            </a>
+            <div className="attachment-rm circle" onClick={this.onAttachmentRemoveClick.bind(this,at_item.id,at_item["a.file_name"])} data-id={at_item.id}>x</div>
+            </div>
+                                        // {i == 0 ? <div className="card-action"></div> : <div></div>}
+                                        )}
+            <div className="card-action"></div>
+            </div>
+            </div>
+            <div id="activity">
+            <h5>Activity</h5>
+            <div id="inputComment">
+            <form onSubmit={this.submitComment.bind(this)}>
+            <textarea type="text" className="inputComment" ref="commentInput" placeholder="Enter comment" />
+            <button type="submit" className="btn-flat green right">Say it!</button>
+            </form>
+            <div className="clear"></div>
+            </div>
+            <div id="commetnList">
+            { this.state.comments.map((c_item,ic)=>
+                <div className="activity-item" key={"comment-"+this.state.taskId+"-"+ic}>
+                <div className="activity-avatar">
+
+                {c_item["u.Avatar"]
+                ? <img  src={"/uploads/"+c_item["u.Avatar"]} className="avatar-mini circle responsive-img" width="40" height="40" />
+                : <img src={"https://placeholdit.imgix.net/~text?txtsize=15&txt="+c_item["u.Name"].charAt(0).toUpperCase()+"&w=40&h=40&txttrack=0&txtclr=000000&bg="+ c_item["u.Color"]} className="circle  responsive-img" />
+            }
+
+            </div>
+            <div className="activity-detail">
+            <div>Posted : {timeConverterWithTime(c_item["c.date"])}</div>
+            {c_item["c.text"]}
+            </div>
+            </div>
+            )}
+            </div>
+            <div>
+
+            </div>
+            </div>
+            </div>
+            <div className="col s4 bg-gray">
+            <Move socket={this.props.socket} taskId={this.state.taskId}/>
+
+
+
+
+            <Dropdown trigger={
+                <div className="userAssigned">
+                <div>Assigned to </div>
+                <Avatar name={this.state.taskData['ua.Name']} avatar={this.state.taskData['ua.Avatar']} color={this.state.taskData['ua.Color']} />
+                <div>{this.state.taskData['ua.Name']}</div>
+                </div>
+            }>
+            { this.state.listUsers.map((user, i) =>
+                <NavItem key={'asu-'+i} onClick={this.activeListUser.bind(this,user)}>
+                {user.name}
+                </NavItem>
+                )}
+            </Dropdown>
+
+
+            <div className="rightBarItem">
+            <strong>Start Date : </strong>
+            <Datetime isValidDate={this.validDateStart.bind(this)} onChange={this.selectStartDate.bind(this)} value={moment.unix(Math.round(parseInt(this.state.taskData['t.startDate']) / 1000))} />
+            <strong>Due Date : </strong>
+            <Datetime isValidDate={this.validDateEnd.bind(this)} onChange={this.selectEndDate.bind(this)} value={moment.unix(Math.round(parseInt(this.state.taskData['t.endDate']) / 1000))} />
+            </div>
+            <div className="rightBarItem" id="tags"
+            onMouseOver={this._handleFocus.bind(this)}
+            onMouseLeave={this._handleBlur.bind(this)}
+            onClick={this._toggleDropdown.bind(this)}>
+            <strong>Tags</strong>
+            <div>
+            {this.state.currentTags.map((tag,i)=>
+                <div key={"color-"+i} className={"tagColor "+tag["l.color"]} style={{backgroundColor:tag["l.bg_color"],color:tag["l.f_color"]}}>{tag["l.text"]}</div>
+                )}
+            <div className="clear"></div>
+            </div>
+
+            {
+                this.state.dropdownIsVisible &&
+                <div id="tagList" className="fade-animation" onMouseOver={this._handleFocus.bind(this)}
+                onMouseLeave={this._handleBlur.bind(this)}>
+                <div id="btn-manage-tag" onClick={this.openTags.bind(this)}>[Manage Tags]</div>
+                {this.state.allTags.map((taga,ti)=>
+                    <div className={this.classTag(taga['ID(t)'])} key={"tag-all-"+ti+taga["ID(t)"]} onClick={this.clickTag.bind(this,taga["ID(t)"],taga["t.color"],taga["t.text"],taga["t.bg_color"],taga["t.f_color"])}>
+                    <div className={"tagColor "+taga['t.color']} style={{backgroundColor:taga['t.bg_color'],color:taga['t.f_color']}}>{taga["t.text"]}</div>
+                    <div className="clear"></div>
+                    </div>
+                    )}
+                </div>
+            }
+            </div>
+            </div>
+
+            </div>
+            </div>
+            <div id="popup" className="fade-animation">
+            </div>
+            {this.state.loading?<Loading loading={this.state.loading}/>:null}
+            {this.state.showTag?<Tags projectId={this.state.projectId} socket={this.props.socket} closeTags={this.closeTags.bind(this)} />:null}
+            </div>
+            );
+}
 }
 class StatusAction extends Component {
     checkStatusActive() {
@@ -543,17 +548,17 @@ class StatusAction extends Component {
     render() {
         return (
             <div style={{width: '450px'}}>
-                <div style={{display:this.checkStatusActive()}}>
-                    <button type="button" className="btn green"  onClick={this.props.changeStatus.bind(this,'complete')}>Complete</button>
-                    <button type="button" className="btn blue"  onClick={this.props.changeStatus.bind(this,'archive')}>Archive</button>
-                    <button type="button" className="btn red"  onClick={this.props.changeStatus.bind(this,'trash')}>Trash</button>
-                </div>
-                <div style={{display:this.checkStatusInactive()}}>
-                    <button type="button" className="btn orange"  onClick={this.props.changeStatus.bind(this,'active')}>Make Active</button>
-                    <button type="button" className="btn blue"  onClick={this.props.changeStatus.bind(this,'archive')}>Archive</button>
-                </div>
+            <div style={{display:this.checkStatusActive()}}>
+            <button type="button" className="btn green"  onClick={this.props.changeStatus.bind(this,'complete')}>Complete</button>
+            <button type="button" className="btn blue"  onClick={this.props.changeStatus.bind(this,'archive')}>Archive</button>
+            <button type="button" className="btn red"  onClick={this.props.changeStatus.bind(this,'trash')}>Trash</button>
             </div>
-        )
+            <div style={{display:this.checkStatusInactive()}}>
+            <button type="button" className="btn orange"  onClick={this.props.changeStatus.bind(this,'active')}>Make Active</button>
+            <button type="button" className="btn blue"  onClick={this.props.changeStatus.bind(this,'archive')}>Archive</button>
+            </div>
+            </div>
+            )
     }
 }
 export default TaskDetail;
