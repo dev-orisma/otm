@@ -23,14 +23,14 @@ const MatchWhenAuthorized = ({ component: Component, ...rest }) => (
 class ProjectDemo extends Component {
 	constructor(props) {
 		super(props);
-		var taskData = new Array();
-		taskData["id-100"] = {id:"id-100",header:"test 100",detail:"detail 100",preview:"none"};
+		let taskData = new Array();
+		taskData["id-100"] = {id:"id-100",header:"test 100 sdas",detail:"detail 100",preview:"none"};
 		taskData["id-101"] = {id:"id-101",header:"child 101",detail:"detail 101",preview:"none"};
 		taskData["id-102"] = {id:"id-102",header:"child 102",detail:"detail 102",preview:"none"};
-		taskData["id-200"] = {id:"id-200",header:"test 200",detail:"detail 200",preview:"none"};
+		taskData["id-200"] = {id:"id-200",header:"test 200 sdas",detail:"detail 200",preview:"none"};
 		taskData["id-201"] = {id:"id-201",header:"child 201",detail:"detail 201",preview:"none"};
 		taskData["id-202"] = {id:"id-202",header:"child 202",detail:"detail 202",preview:"none"};
-		taskData["id-300"] = {id:"id-300",header:"test 300",detail:"detail 300",preview:"none"};
+		taskData["id-300"] = {id:"id-300",header:"test 300 sad",detail:"detail 300",preview:"none"};
 		taskData["id-301"] = {id:"id-301",header:"child 301",detail:"detail 301",preview:"none"};
 		taskData["id-302"] = {id:"id-302",header:"child 302",detail:"detail 302",preview:"none"};
 		taskData["id-303"] = {id:"id-303",header:"child 303",detail:"detail 303 asdasdasdas asd as dasd asd asd asd assa as as dasd s",preview:"none"};
@@ -38,7 +38,7 @@ class ProjectDemo extends Component {
 		taskData["id-334"] = {id:"id-334",header:"child 334",detail:"detail 334",preview:"none"};
 		taskData["id-335"] = {id:"id-335",header:"child 335",detail:"detail 335",preview:"none"};
 
-		var taskChild = new Array();
+		let taskChild = new Array();
 		taskChild["id-100"] = ["id-101","id-102"];
 		taskChild["id-200"] = ["id-201","id-202"];
 		taskChild["id-300"] = ["id-301","id-302","id-303"];
