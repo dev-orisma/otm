@@ -54,11 +54,12 @@ class Navbar extends Component {
 		socket.on('notify:updateCount', this.updateNotify.bind(this));
 	}
 	componentWillUnmount() {
-
+		window.removeEventListener('click', this._hideNotify.bind(this), false);
 	}
 	updateNotify(){
 		if(auth.loggedIn()){
 			Common.countNotification(socket,(rs)=>{
+				console.log(rs);
 				if(!rs){
 
 				}else{
@@ -102,9 +103,9 @@ class Navbar extends Component {
 					<li><Link to="/timeline"><i className="large material-icons">clear_all</i></Link></li>
 					<li><Link to="/filter"><i className="large material-icons">search</i></Link></li>
 					<li className="relative">
-						<a href="#" onClick={this.showNotify.bind(this)} onMouseOver={this._handleFocus.bind(this)} onMouseLeave={this._handleBlur.bind(this)}>
-							<i className="large material-icons">info</i> {this.state.notify > 0 &&<span className="notify">{this.state.notify}</span>}</a>
-						{this.state.notifyVisible&&<div id="modal-notify"><Notification updateNotify={this.updateNotify.bind(this)} socket={socket} onMouseOver={this._handleFocus.bind(this)} onMouseLeave={this._handleBlur.bind(this)} /><div id="overlayTransparent"></div></div>}
+					<a href="#" onClick={this.showNotify.bind(this)} onMouseOver={this._handleFocus.bind(this)} onMouseLeave={this._handleBlur.bind(this)}>
+					<i className="large material-icons">info</i> {this.state.notify > 0 &&<span className="notify">{this.state.notify}</span>}</a>
+					{this.state.notifyVisible&&<div id="modal-notify"><Notification updateNotify={this.updateNotify.bind(this)} socket={socket} onMouseOver={this._handleFocus.bind(this)} onMouseLeave={this._handleBlur.bind(this)} /><div id="overlayTransparent"></div></div>}
 					</li>
 					<li><Link to="/profile"><i className="large material-icons">perm_identity</i></Link></li>
 					<li><Link to="/logout"><i className="large material-icons">power_settings_new</i></Link></li>

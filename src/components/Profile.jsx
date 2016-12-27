@@ -46,14 +46,14 @@ class Profile extends Component {
 		this.setState({U_name:e.target.value});
 	}
 	onDragEnter(e) {
-	    this.setState({ isReceiverOpen: true });
+		this.setState({ isReceiverOpen: true });
 	}
 	onDragOver(e) {
 		this.setState({loading:false});
 	    // your codes here
 	}
 	onDragLeave(e) {
-	    this.setState({ isReceiverOpen: false });
+		this.setState({ isReceiverOpen: false });
 	}
 	onDrop(acceptedFiles) {
 		if(acceptedFiles.length > 0){
@@ -65,7 +65,7 @@ class Profile extends Component {
 			var socket_send = this.props.socket;
 			reader.readAsBinaryString(first_file);
 			reader.onload = function(event) {
-		        var binary_file = event.target.result;
+				var binary_file = event.target.result;
 				auth.saveAvatar(socket_send,uid, binary_file, (file_name) => {
 					if (file_name == ""){
 						return Materialize.toast("เกิดข้อผิดพลาด", 4000)
@@ -79,7 +79,7 @@ class Profile extends Component {
 		}else{
 			alert("ไม่สามารถอัพโหลดไฟล์ได้");
 		}
-    }
+	}
 	render() {
 		return (
 
@@ -90,53 +90,53 @@ class Profile extends Component {
 			<div className="row">
 			<div className="input-field col s12">
 			<div id="dropdown-upload">
-				<input id="avatar" ref="avatar" type="hidden" value={this.state.U_avatar} />
-				<div>
-				{this.state.U_avatar != ""?
-					<img className="img-responsive" src={this.state.U_avatar_url} />
-					: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+this.state.U_name.charAt(0).toUpperCase()+"&w=100&h=100&txttrack=0&txtclr=000000&bg="+ this.state.U_color} className={"  tooltipped tooltip-user " + this.state.U_color} data-position="top" data-delay="50" data-tooltip={this.state.U_name} />
-				}
-				</div>
-				Drag & Drop image avatar
-				<Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
-                    <div>Try dropping some files here, or click to select files to upload.</div>
-                </Dropzone>
-			</div>
-			</div>
-			</div>
+			<input id="avatar" ref="avatar" type="hidden" value={this.state.U_avatar} />
+			<div>
+			{this.state.U_avatar != ""?
+			<img className="img-responsive" src={this.state.U_avatar_url} />
+			: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+this.state.U_name.charAt(0).toUpperCase()+"&w=100&h=100&txttrack=0&txtclr=000000&bg="+ this.state.U_color} className={"  tooltipped tooltip-user " + this.state.U_color} data-position="top" data-delay="50" data-tooltip={this.state.U_name} />
+		}
+		</div>
+		Drag & Drop image avatar
+		<Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
+		<div>Try dropping some files here, or click to select files to upload.</div>
+		</Dropzone>
+		</div>
+		</div>
+		</div>
 
-			<div className="row">
-			<div className="input-field col s12">
-			<input id="email" ref="email" type="email" placeholder="Email" value={this.state.U_email} readOnly />
-			<label htmlFor="email" className="active">Email</label>
-			</div>
-			</div>
+		<div className="row">
+		<div className="input-field col s12">
+		<input id="email" ref="email" type="email" placeholder="Email" value={this.state.U_email} readOnly />
+		<label htmlFor="email" className="active">Email</label>
+		</div>
+		</div>
 
-			<div className="row">
-			<div className="input-field col s12">
-			<input id="name" ref="name" type="text" placeholder="Name" value={this.state.U_name} onChange={this.onChangeName.bind(this)} className="validate" required />
-			<label htmlFor="name" className="active">Name</label>
-			</div>
-			</div>
+		<div className="row">
+		<div className="input-field col s12">
+		<input id="name" ref="name" type="text" placeholder="Name" value={this.state.U_name} onChange={this.onChangeName.bind(this)} className="validate" required />
+		<label htmlFor="name" className="active">Name</label>
+		</div>
+		</div>
 
-			<div className="row">
-			<div className="input-field col s12">
-			<input id="password" ref="pass" type="password" className="validate" />
-			<label htmlFor="password">New Password</label>
-			</div>
-			</div>
+		<div className="row">
+		<div className="input-field col s12">
+		<input id="password" ref="pass" type="password"/>
+		<label htmlFor="password">New Password</label>
+		</div>
+		</div>
 
-			<div className="row">
-			<div className="input-field col s12">
-			<button type="submit" className="waves-effect waves-light btn">Save Setting</button>
-			</div>
-			</div>
-			</form>
-			</div>
+		<div className="row">
+		<div className="input-field col s12">
+		<button type="submit" className="waves-effect waves-light btn">Save Setting</button>
+		</div>
+		</div>
+		</form>
+		</div>
 
-			{this.state.loading?<Loading loading={this.state.loading}/>:null}
-			</div>
-			);
+		{this.state.loading?<Loading loading={this.state.loading}/>:null}
+		</div>
+		);
 	}
 }
 

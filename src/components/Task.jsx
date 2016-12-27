@@ -8,6 +8,7 @@ import Redirect from 'react-router/Redirect'
 import tasks from './Module/Task';
 import moment from 'moment';
 import Loading from './Loading';
+import MiniLoading from './MiniLoading';
 import Avatar from './Avatar';
 
 var _ = require('lodash')
@@ -61,7 +62,9 @@ class Task extends Component {
 			if(!rs){
 
 			}else{
-				this.setState({listTasks:rs });
+				var {listTasks} = this.state
+				listTasks = rs;
+				this.setState({listTasks});
 			}
 		})
 	}
@@ -110,13 +113,13 @@ class Task extends Component {
 			}else{
 				after = ""
 			}
-			console.log('CID '+cid,'ID '+id,'P '+parent,'A '+after)
 			let store_state = this.state.cardList
 			tasks.sortTask(socket,cid,id,parent,after,"sorted",(rs)=>{
 				if(!rs){
 					$(event['target']).sortable('cancel');
 					this.setState({ listTasks: store_state });
 				}else{
+					// this.props.projectsListCard();
 					this.setState({looped:false})
 				}
 				this.setState({loading:false });
@@ -146,6 +149,7 @@ class Task extends Component {
 					$(event['target']).sortable('cancel');
 					this.setState({ listTasks: store_state });
 				}else{
+					// this.props.projectsListCard();
 					this.setState({looped:false})
 				}
 				this.setState({loading:false });
@@ -162,7 +166,7 @@ class Task extends Component {
 		if(parent === undefined || parent === null){
 			parent = ""
 		}
-		const totalTask = $('#c-'+cid+' .task-box').length
+		const totalTask = $('#c-'+cid+' .sort-task .task-box').length
 		tasks.add(socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,totalTask,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
@@ -193,7 +197,7 @@ class Task extends Component {
 				<div className={"task-box " + task_item.status} data-id={task_item.id} id={"task-"+task_item.id} key={i}>
 				<Link to={`/task/${task_item.id}`}>
 				<div className="task-assign">
-					<Avatar name={task_item.user_name} avatar={task_item.user_avatar} color={task_item.user_color}/>
+				<Avatar name={task_item.user_name} avatar={task_item.user_avatar} color={task_item.user_color}/>
 				</div>
 
 				<div className="task-title">{task_item.title}</div>
@@ -222,7 +226,7 @@ class Task extends Component {
 				:
 				null
 			}
-			{this.state.loading?<Loading loading={this.state.loading}/>:null}
+			{this.state.loading?<MiniLoading/>:null}
 			{this.state.showAddButton&&<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>}
 			</div>
 			)

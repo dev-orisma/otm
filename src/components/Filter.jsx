@@ -253,34 +253,34 @@ class Filter extends Component {
         this.setState({taskDetail: taskDetail});
         window.history.pushState("", 'Filter', '/task/'+task_id);
     }
-	render() {
-		return (
-			<div className="" id='filter_panel'>
-                <div className='filter_row'>
-                    <ListPanel taskList={this.state.taskList} viewTaskDetail={this.viewTaskDetail.bind(this)}/>
-                    <FilterPanel project={this.state.project}
-                                 users={this.state.users}
-                                 tags={this.state.tags}
-                                 task_status={this.state.task_status}
-                                 keyword={this.state.keyword}
-                                 operation={this.state.operation}
-                                 filter_display={this.state.filter_display}
-                                 projectToggle={this.toggleProjectSelect.bind(this)}
-                                 userToggle={this.toggleUserSelect.bind(this)}
-                                 tagToggle={this.toggleTagSelect.bind(this)}
-                                 taskStatusToggle={this.toggleTaskStatus.bind(this)}
-                                 addKeyword={this.addKeyword.bind(this)}
-                                 removeKeyword={this.removeKeyword.bind(this)}
-                                 toggleOperation={this.toggleOperation.bind(this)}
-                                 toggleShowFilter={this.toggleShowFilter.bind(this)}
-                                 />
-                </div>
-                {this.state.taskDetail.map((task_id,index) =>
-                    <TaskDetail key={index} taskId={task_id} socket={this.props.socket} closeTask={this.closeTaskDetail.bind(this)}/>
-                )}
-			</div>
-		)
-	}
+    render() {
+      return (
+         <div className="" id='filter_panel'>
+         <div className='filter_row'>
+         <ListPanel taskList={this.state.taskList} viewTaskDetail={this.viewTaskDetail.bind(this)}/>
+         <FilterPanel project={this.state.project}
+         users={this.state.users}
+         tags={this.state.tags}
+         task_status={this.state.task_status}
+         keyword={this.state.keyword}
+         operation={this.state.operation}
+         filter_display={this.state.filter_display}
+         projectToggle={this.toggleProjectSelect.bind(this)}
+         userToggle={this.toggleUserSelect.bind(this)}
+         tagToggle={this.toggleTagSelect.bind(this)}
+         taskStatusToggle={this.toggleTaskStatus.bind(this)}
+         addKeyword={this.addKeyword.bind(this)}
+         removeKeyword={this.removeKeyword.bind(this)}
+         toggleOperation={this.toggleOperation.bind(this)}
+         toggleShowFilter={this.toggleShowFilter.bind(this)}
+         />
+         </div>
+         {this.state.taskDetail.map((task_id,index) =>
+            <TaskDetail key={index} taskId={task_id} socket={this.props.socket} closeTask={this.closeTaskDetail.bind(this)}/>
+            )}
+         </div>
+         )
+  }
 }
 
 /*class ProjectSelect extends Component {
@@ -301,11 +301,11 @@ class ProjectDisplay extends Component {
         if (this.props.data.selected) {
             return (
                 <i className="material-icons project_select">check_box</i>
-            )
+                )
         } else {
             return (
                 <i className="material-icons project_select">check_box_outline_blank</i>
-            )
+                )
         }
     }
     checkActive() {
@@ -318,9 +318,9 @@ class ProjectDisplay extends Component {
     render() {
         return (
             <div className={"project_list "+this.checkActive()} onClick={this.props.projectToggle.bind(this,this.props.data.id)}>
-                {this.selectedData()}{this.props.data.name}
+            {this.selectedData()}{this.props.data.name}
             </div>
-        )
+            )
     }
 }
 class FilterPanel extends Component {
@@ -334,11 +334,13 @@ class FilterPanel extends Component {
         this.addKeyword = this.addKeyword.bind(this);
     }
     addKeyword() {
-        this.props.addKeyword(this.state.keyword);
-        this.setState({keyword: ""});
+        if(this.state.keyword !=""){
+            this.props.addKeyword(this.state.keyword);
+            this.setState({keyword: ""});
+        }
     }
     inputKeypress(event) {
-        if(event.key == 'Enter'){
+        if(event.key == 'Enter' && this.state.keyword){
             this.addKeyword();
         }
     }
@@ -362,71 +364,71 @@ class FilterPanel extends Component {
     render() {
         return (
             <div className="filter_panel">
-                <div className='filter_head'>Filter</div>
-                <div className='filter_option'>
-                    <div className='task_detail'>
-                        <div className='filter_header'>
-                            Project
-                            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.project)} onClick={this.props.toggleShowFilter.bind(this,"project")}></div>
-                        </div>
-                        <div className='filter'>
-                            <div className={"filter_project "+this.convertShowStatus(this.props.filter_display.project)}>
-                                {this.props.project.map((project) =>
-                                    <ProjectDisplay key={project.id} data={project} projectToggle={this.props.projectToggle}/>
-                                )}
-                            </div>
-                        </div>
-                        <div className='filter_header'>
-                            Keyword
-                            <div className='sign right1' onClick={this.props.toggleOperation.bind(this,"keyword")}>{this.props.operation.keyword}</div>
-                        </div>
-                        <div className='filter'>
-                            <div className='filter_keyword'>
-                                <input type='text' className='input_keyword' onChange={this.getKeyword} value={this.state.keyword} onKeyPress={this.inputKeypress} />
-                                <i className="material-icons" onClick={this.addKeyword}>add_box</i>
-                            </div>
-                            <div className='keyword_list'>
-                                {this.props.keyword.map((keyword,index) =>
-                                    <KeywordList key={index} keyword={keyword} index={index} removeKeyword={this.props.removeKeyword}/>
-                                )}
-                            </div>
-                        </div>
-                        <div className='filter_header'>
-                            Assigned To
-                            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.assign)} onClick={this.props.toggleShowFilter.bind(this,"assign")}></div>
-                        </div>
-                        <div className='filter'>
-                            <div className={"filter_assign "+this.convertShowStatus(this.props.filter_display.assign)}>
-                                {this.props.users.map((users) =>
-                                    <UserList key={users.id} data={users} userToggle={this.props.userToggle}/>
-                                )}
-                            </div>
-                        </div>
-                        <div className='filter_header'>
-                            Tags
-                            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.tags)} onClick={this.props.toggleShowFilter.bind(this,"tag")}></div>
-                        </div>
-                        <div className='filter'>
-                            <div className={"filter_tag "+this.convertShowStatus(this.props.filter_display.tags)}>
-                                {this.props.tags.map((tag) =>
-                                    <TagsList key={tag.id} data={tag} tagToggle={this.props.tagToggle} />
-                                )}
-                            </div>
-                        </div>
-                        <div className='filter_header'>
-                            Status
-                        </div>
-                        <div className='filter'>
-                            <div className='filter_status'>
-                                {this.props.task_status.map((status) =>
-                                    <StatusList key={status.id} data={status} statusToggle={this.props.taskStatusToggle} />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div className='filter_head'>Filter</div>
+            <div className='filter_option'>
+            <div className='task_detail'>
+            <div className='filter_header'>
+            Project
+            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.project)} onClick={this.props.toggleShowFilter.bind(this,"project")}></div>
             </div>
-        )
+            <div className='filter'>
+            <div className={"filter_project "+this.convertShowStatus(this.props.filter_display.project)}>
+            {this.props.project.map((project) =>
+                <ProjectDisplay key={project.id} data={project} projectToggle={this.props.projectToggle}/>
+                )}
+            </div>
+            </div>
+            <div className='filter_header'>
+            Keyword
+            <div className='sign right1' onClick={this.props.toggleOperation.bind(this,"keyword")}>{this.props.operation.keyword}</div>
+            </div>
+            <div className='filter'>
+            <div className='filter_keyword'>
+            <input type='text' className='input_keyword' onChange={this.getKeyword} value={this.state.keyword} onKeyPress={this.inputKeypress} />
+            <i className="material-icons" onClick={this.addKeyword}>add_box</i>
+            </div>
+            <div className='keyword_list'>
+            {this.props.keyword.map((keyword,index) =>
+                <KeywordList key={index} keyword={keyword} index={index} removeKeyword={this.props.removeKeyword}/>
+                )}
+            </div>
+            </div>
+            <div className='filter_header'>
+            Assigned To
+            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.assign)} onClick={this.props.toggleShowFilter.bind(this,"assign")}></div>
+            </div>
+            <div className='filter'>
+            <div className={"filter_assign "+this.convertShowStatus(this.props.filter_display.assign)}>
+            {this.props.users.map((users) =>
+                <UserList key={users.id} data={users} userToggle={this.props.userToggle}/>
+                )}
+            </div>
+            </div>
+            <div className='filter_header'>
+            Tags
+            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.tags)} onClick={this.props.toggleShowFilter.bind(this,"tag")}></div>
+            </div>
+            <div className='filter'>
+            <div className={"filter_tag "+this.convertShowStatus(this.props.filter_display.tags)}>
+            {this.props.tags.map((tag) =>
+                <TagsList key={tag.id} data={tag} tagToggle={this.props.tagToggle} />
+                )}
+            </div>
+            </div>
+            <div className='filter_header'>
+            Status
+            </div>
+            <div className='filter'>
+            <div className='filter_status'>
+            {this.props.task_status.map((status) =>
+                <StatusList key={status.id} data={status} statusToggle={this.props.taskStatusToggle} />
+                )}
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            )
     }
 }
 class StatusList extends Component {
@@ -434,19 +436,19 @@ class StatusList extends Component {
         if (this.props.data.selected) {
             return (
                 <i className="material-icons status_select">check_box</i>
-            )
+                )
         } else {
             return (
                 <i className="material-icons status_select">check_box_outline_blank</i>
-            )
+                )
         }
     }
     render() {
         return (
             <div className='filter_status_list' onClick={this.props.statusToggle.bind(this,this.props.data.id)}>
-                {this.selectedData()}{this.props.data.status}
+            {this.selectedData()}{this.props.data.status}
             </div>
-        )
+            )
     }
 }
 class TagsList extends Component {
@@ -460,12 +462,12 @@ class TagsList extends Component {
     render() {
         return (
             <div className={"tagsList "+this.checkSelected()} onClick={this.props.tagToggle.bind(this,this.props.data.id)}>
-                <div className={"tagColor "+this.props.data.color} style={{background:this.props.data.bg,color:this.props.data.f}}>
-                    {this.props.data.text}
-                </div>
-                <i className={"material-icons selected"}>check_circle</i>
+            <div className={"tagColor "+this.props.data.color} style={{background:this.props.data.bg,color:this.props.data.f}}>
+            {this.props.data.text}
             </div>
-        )
+            <i className={"material-icons selected"}>check_circle</i>
+            </div>
+            )
     }
 }
 class UserList extends Component {
@@ -479,11 +481,11 @@ class UserList extends Component {
     render() {
         return (
             <div className={"userList "+this.checkSelected()} onClick={this.props.userToggle.bind(this,this.props.data.id)}>
-                <Avatar name={this.props.data.name} avatar={this.props.data.avatar} color={this.props.data.color}/>
-                <div className="userName">{this.props.data.name}</div>
-                <i className="material-icons selected">check_circle</i>
+            <Avatar name={this.props.data.name} avatar={this.props.data.avatar} color={this.props.data.color}/>
+            <div className="userName">{this.props.data.name}</div>
+            <i className="material-icons selected">check_circle</i>
             </div>
-        )
+            )
     }
 }
 
@@ -491,70 +493,70 @@ class DatePanel extends Component {
     render() {
         return (
             <div className="date_panel">
-                <div className='date_display'>
-                    {this.props.data.date_str}
-                </div>
-                <div className="task_in_date">
-                    {this.props.data.data.map((task_list,index) =>
-                        <TaskListInDate key={index} data={task_list} viewTaskDetail={this.props.viewTaskDetail}/>
-                    )}
-                </div>
+            <div className='date_display'>
+            {this.props.data.date_str}
             </div>
-        )
+            <div className="task_in_date">
+            {this.props.data.data.map((task_list,index) =>
+                <TaskListInDate key={index} data={task_list} viewTaskDetail={this.props.viewTaskDetail}/>
+                )}
+            </div>
+            </div>
+            )
     }
 }
 class TagsListInTask extends Component {
     render() {
         return (
             <div className="tagsList">
-                <div className={"tagColor "+this.props.data.properties.color} style={{background:this.props.data.properties.bg_color,color:this.props.data.properties.f_color}}>
-                    {this.props.data.properties.text}
-                </div>
+            <div className={"tagColor "+this.props.data.properties.color} style={{background:this.props.data.properties.bg_color,color:this.props.data.properties.f_color}}>
+            {this.props.data.properties.text}
             </div>
-        )
+            </div>
+            )
     }
 }
 class TaskListInDate extends Component {
     render() {
         return (
             <div className="task_in_date_list">
-                <div className='task_detail' onClick={this.props.viewTaskDetail.bind(this,this.props.data.id)}>
-                    <div className='task_name'>
-                        {this.props.data.title}
-                    </div>
-                    <div className='tag_panel'>
-                        {this.props.data.tags.map((tag,index) =>
-                            <TagsListInTask key={index} data={tag} />
-                        )}
-                    </div>
-                </div>
+            <div className='task_detail' onClick={this.props.viewTaskDetail.bind(this,this.props.data.id)}>
+            <div className='task_name'>
+            {this.props.data.title}
             </div>
-        )
+            <div className='tag_panel'>
+            {this.props.data.tags.map((tag,index) =>
+                <TagsListInTask key={index} data={tag} />
+                )}
+            </div>
+            </div>
+            </div>
+            )
     }
 }
 class KeywordList extends Component {
     render() {
         return (
             <div className='keyword' onClick={this.props.removeKeyword.bind(this,this.props.index)}>
-                <div className='keyword_text'>
-                    {this.props.keyword}
-                </div>
-                <i className="material-icons">clear</i>
+            <div className='keyword_text'>
+            {this.props.keyword}
             </div>
-        )
+            <i className="material-icons">clear</i>
+            </div>
+            )
     }
 }
 class ListPanel extends Component {
     render() {
         return (
             <div className="task_list_panel">
-                <Scrollbars className='scroll_list'>
-                    {this.props.taskList.map((date_list,index) =>
-                        <DatePanel key={date_list.id} data={date_list} viewTaskDetail={this.props.viewTaskDetail}/>
-                    )}
-                </Scrollbars>
+            <Scrollbars className='scroll_list'>
+            {this.props.taskList.map((date_list,index) =>
+                <DatePanel key={date_list.id} data={date_list} viewTaskDetail={this.props.viewTaskDetail}/>
+                )}
+            </Scrollbars>
             </div>
-        )
+            )
     }
 }
 

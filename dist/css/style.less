@@ -1555,3 +1555,17 @@ hr{
 .w100{
 	width: 100%;
 }
+#loadin-mini{
+	padding: 10px;
+	position: fixed;
+	left: 10px;
+	bottom: 20px;
+	z-index: 9999;
+	background: rgba(0,0,0,0.5);
+	color: #fff;
+	font-size: 16px;
+}
+[contenteditable]:empty:before{
+  content: attr(placeholder);
+  display: block; /* For Firefox */
+}

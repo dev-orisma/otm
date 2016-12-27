@@ -3,7 +3,7 @@ module.exports = function (socket,db) {
 	function listUpdateTask(data,cb){
 		cb = arguments[arguments.length - 1]
 		db.cypher({
-			query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  ' +
+			query:'MATCH x=(c:Cards)<-[:Parent*]-(t:Tasks)  ' +
 			'WHERE id(c)='+data.cid+' ' +
 			'AND t.status <> "archive" ' +
 			'AND t.status <> "trash" ' +
@@ -66,7 +66,7 @@ module.exports = function (socket,db) {
 			sql_card = ' CREATE (t)-[:Parent]->(c) '
 		}
 		db.cypher({
-			query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' MATCH (uz:Users) WHERE ID(uz)=0 CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",status:"active",cid:'+data.cid+'}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t) CREATE (t)-[:LIVE_IN {date:"'+data.at_create+'"}]->(p) '+sql_card+' CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment {date:"'+data.at_create+'"}]->(cm)-[:IN {date:"'+data.at_create+'"}]->(t) CREATE (uz)-[:Assigned {date:"'+data.at_create+'"}]->(t) RETURN ID(t)',
+			query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' MATCH (uz:Users) WHERE ID(uz)=0 CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",status:"active",cid:'+data.cid+'}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t) '+sql_card+' CREATE (t)-[:IN]->(c) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment {date:"'+data.at_create+'"}]->(cm)-[:IN {date:"'+data.at_create+'"}]->(t) CREATE (uz)-[:Assigned {date:"'+data.at_create+'"}]->(t) RETURN ID(t)',
 		},function(err,results){
 			if (err) {
 				console.log(err);
@@ -101,7 +101,7 @@ module.exports = function (socket,db) {
 	});
 	socket.on('task:list',function(data,rs){
 		db.cypher({
-			query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  ' +
+			query:'MATCH x=(c:Cards)<-[:Parent*]-(t:Tasks)  ' +
 			'WHERE id(c)='+data.cid+' ' +
 			'AND t.status <> "archive" ' +
 			'AND t.status <> "trash" ' +
@@ -165,7 +165,7 @@ module.exports = function (socket,db) {
 
 	socket.on('task:listByProject',function(data,rs){
 		db.cypher({
-			query:'MATCH (p:Projects)<-[l:LIVE_IN]-(t:Tasks) WHERE ID(p) = '+data.pid+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u)',
+			query:'MATCH (p:Projects)<-[l:LIVE_IN]-(c:Cards)<-[:IN]-(t:Tasks) WHERE ID(p) = '+data.pid+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u)',
 		},function(err,results){
 			if (err) console.log(err);
 			var res = [];
@@ -186,7 +186,6 @@ module.exports = function (socket,db) {
 			}
 		});
 	});
-
 	socket.on('task:changeEndTime', function (data,fn) {
 		db.cypher({
 			query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' SET t.endDate = "'+data.time+'" RETURN t'
@@ -230,7 +229,6 @@ module.exports = function (socket,db) {
 	});
 
 	socket.on('task:changePosition', function (data,fn) {
-
 		var sql = 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (u:Users)-[a:Assigned]->(t) MATCH (u2:Users) WHERE ID(u2) = '+data.new_uid+' DELETE a CREATE (u2)-[:Assigned]->(t) SET t.startDate = "'+data.time_start+'", t.endDate = "'+data.time_end+'" RETURN t'
 		db.cypher({
 			query: sql
@@ -403,6 +401,33 @@ module.exports = function (socket,db) {
 			if (err) {
 				console.log(err);
 			}else{
+
+				db.cypher({
+					query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l4:IN]->(c:Cards) DELETE l4 RETURN t,c'
+				},function(err,nrs1){
+					if (err){ console.log(err)}
+						listUpdateTask(data,function(cb){
+							if(!cb){
+								rs(false)
+							}else{
+								rs(cb)
+							}
+						})
+				});
+
+				db.cypher({
+					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' SET t.cid = '+data.cid+' CREATE (t)-[:IN]->(c)'
+				},function(err,nrs1){
+					if (err){ console.log(err)}
+						listUpdateTask(data,function(cb){
+							if(!cb){
+								rs(false)
+							}else{
+								rs(cb)
+							}
+						})
+				});
+
 				if(rs_relate[0]['ID(c)'] && rs_relate[0]['ID(after)']){
 					db.cypher({
 						query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_relate[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
@@ -438,6 +463,7 @@ module.exports = function (socket,db) {
 						}
 					})
 				}
+
 
 
 				if((!data.parent || data.parent ==="") && (!data.after || data.after ==="")){
@@ -505,68 +531,5 @@ module.exports = function (socket,db) {
 			}
 		})
 	});
-	// socket.on('task:move',function(data,rs){
-	// 	db.cypher({
-	// 		// query:'MATCH (t:Tasks) WHERE ID(t) = '+data.task_id+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) DELETE l1,l2,l3 RETURN ID(before),ID(after),ID(c)'
-	// 		query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) RETURN ID(before),ID(after),ID(c)'
-	// 	},function(err,rs_relate){
-	// 		console.log(1);
-	// 		if(rs_relate[0]['ID(c)'] && rs_relate[0]['ID(after)']){
-	// 			console.log(2);
-	// 				db.cypher({
-	// 					query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_relate[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
-	// 				},function(err,rs1){
-	// 					if (err) {console.log(err) }
-	// 						listUpdateTask(data,function(cb){
-	// 							if(!cb){
-	// 								rs(false)
-	// 							}else{
-	// 								rs(cb)
-	// 							}
-	// 						})
-	// 				})
-	// 			}else if(rs_relate[0]['ID(before)'] && rs_relate[0]['ID(after)']){
-	// 				console.log(3);
-	// 				db.cypher({
-	// 					query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(before)']+' MATCH (t2:Tasks) WHERE ID(t2)='+rs_relate[0]['ID(after)']+' CREATE (t2)-[:Parent]->(t)'
-	// 				},function(err,rs2){
-	// 					if (err){ console.log(err)}
-	// 						listUpdateTask(data,function(cb){
-	// 							if(!cb){
-	// 								rs(false)
-	// 							}else{
-	// 								rs(cb)
-	// 							}
-	// 						})
-	// 				})
-	// 			}else{
-	// 				console.log(4);
-	// 				listUpdateTask(data,function(cb){
-	// 					if(!cb){
-	// 						rs(false)
-	// 					}else{
-	// 						rs(cb)
-	// 					}
-	// 				})
-	// 			}
-
-	// 			db.cypher({
-	// 					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' SET t.cid = '+data.cid+' CREATE (t)-[:Parent]->(c)'
-	// 				},function(err,nrs1){
-	// 					console.log(6);
-	// 					if (err){ console.log(err)}
-	// 						listUpdateTask(data,function(cb){
-	// 							if(!cb){
-	// 								rs(false)
-	// 							}else{
-	// 								rs(cb)
-	// 							}
-	// 						})
-	// 				});
-
-
-	// 	});
-	// });
-	//Task===============//
 };
 
