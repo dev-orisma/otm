@@ -9,6 +9,7 @@ import Miss from 'react-router/Miss'
 
 import Dashboard from './Dashboard'
 import Project from './Project'
+import ProjectDemo from './ProjectDemoFlow'
 import Filter from './Filter'
 import Login from './Login'
 import Logout from './Logout'
@@ -125,6 +126,7 @@ class Navbar extends Component {
 				<Match pattern="/Register" exactly render={({ pathname }) => <Register socket={this.state.socket} /> }/>
 				<MatchWhenAuthorized pattern="/timeline" exactly component={Timeline}/>
 				<MatchWhenAuthorized pattern="/project/:projectId" exactly component={Project} />
+				<MatchWhenAuthorized pattern="/project_demo/:projectId" exactly component={ProjectDemo} />
 				<MatchWhenAuthorized pattern="/task/:taskId" exactly component={Project} />
 				<MatchWhenAuthorized pattern="/filter" exactly component={Filter} />
 
