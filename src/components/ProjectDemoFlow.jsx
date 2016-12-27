@@ -23,6 +23,27 @@ const MatchWhenAuthorized = ({ component: Component, ...rest }) => (
 class ProjectDemo extends Component {
 	constructor(props) {
 		super(props);
+		let taskData = new Array();
+		taskData["id-100"] = {id:"id-100",header:"test 100 sdas",detail:"detail 100",preview:"none"};
+		taskData["id-101"] = {id:"id-101",header:"child 101",detail:"detail 101",preview:"none"};
+		taskData["id-102"] = {id:"id-102",header:"child 102",detail:"detail 102",preview:"none"};
+		taskData["id-200"] = {id:"id-200",header:"test 200 sdas",detail:"detail 200",preview:"none"};
+		taskData["id-201"] = {id:"id-201",header:"child 201",detail:"detail 201",preview:"none"};
+		taskData["id-202"] = {id:"id-202",header:"child 202",detail:"detail 202",preview:"none"};
+		taskData["id-300"] = {id:"id-300",header:"test 300 sad",detail:"detail 300",preview:"none"};
+		taskData["id-301"] = {id:"id-301",header:"child 301",detail:"detail 301",preview:"none"};
+		taskData["id-302"] = {id:"id-302",header:"child 302",detail:"detail 302",preview:"none"};
+		taskData["id-303"] = {id:"id-303",header:"child 303",detail:"detail 303 asdasdasdas asd as dasd asd asd asd assa as as dasd s",preview:"none"};
+		taskData["id-333"] = {id:"id-333",header:"child 333",detail:"detail 333",preview:"none"};
+		taskData["id-334"] = {id:"id-334",header:"child 334",detail:"detail 334",preview:"none"};
+		taskData["id-335"] = {id:"id-335",header:"child 335",detail:"detail 335",preview:"none"};
+
+		let taskChild = new Array();
+		taskChild["id-100"] = ["id-101","id-102"];
+		taskChild["id-200"] = ["id-201","id-202"];
+		taskChild["id-300"] = ["id-301","id-302","id-303"];
+		taskChild["id-303"] = ["id-333","id-334","id-335"];
+
 		this.state = {
 			error: false,
 			errorMsg:"",
@@ -42,12 +63,12 @@ class ProjectDemo extends Component {
 			trashTask:0,
 			completeTask:0,
             testTask:[
-                100,
-                200,
-                300
+                "id-100",
+                "id-200",
+                "id-300"
             ],
-            taskData:[],
-			taskChild:[],
+            taskData:taskData,
+			taskChild:taskChild,
 			taskIndex:null,
 			moveState:false,
 			dragZone:null,
@@ -55,24 +76,7 @@ class ProjectDemo extends Component {
 			dragTo:null,
 			checkDrop:null
 		}
-        this.state.taskData[100] = {header:"test 100",detail:"detail 100",preview:"none"};
-        this.state.taskData[101] = {header:"child 101",detail:"detail 101",preview:"none"};
-        this.state.taskData[102] = {header:"child 102",detail:"detail 102",preview:"none"};
-        this.state.taskData[200] = {header:"test 200",detail:"detail 200",preview:"none"};
-        this.state.taskData[201] = {header:"child 201",detail:"detail 201",preview:"none"};
-        this.state.taskData[202] = {header:"child 202",detail:"detail 202",preview:"none"};
-        this.state.taskData[300] = {header:"test 300",detail:"detail 300",preview:"none"};
-        this.state.taskData[301] = {header:"child 301",detail:"detail 301",preview:"none"};
-        this.state.taskData[302] = {header:"child 302",detail:"detail 302",preview:"none"};
-        this.state.taskData[303] = {header:"child 303",detail:"detail 303 asdasdasdas asd as dasd asd asd asd assa as as dasd s",preview:"none"};
-		this.state.taskData[333] = {header:"child 333",detail:"detail 333",preview:"none"};
-		this.state.taskData[334] = {header:"child 334",detail:"detail 334",preview:"none"};
-		this.state.taskData[335] = {header:"child 335",detail:"detail 335",preview:"none"};
 
-		this.state.taskChild[100] = [101,102];
-		this.state.taskChild[200] = [201,202];
-		this.state.taskChild[300] = [301,302,303];
-		this.state.taskChild[303] = [333,334,335];
 
 	}
 	setDropZone(parent,taskId,status) {
