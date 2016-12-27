@@ -90,7 +90,7 @@ class Profile extends Component {
 			<div className="row">
 			<div className="input-field col s12">
 			<div id="dropdown-upload">
-			<input id="avatar" ref="avatar" type="hidden" value={this.state.U_avatar} />
+			<input id="avatar" ref="avatar" type="hidden" value={this.state.U_avatar || ''} />
 			<div>
 			{this.state.U_avatar != ""?
 			<img className="img-responsive" src={this.state.U_avatar_url} />
