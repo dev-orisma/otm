@@ -2,7 +2,7 @@ module.exports = function (socket,db) {
 	//Filter
 	socket.on('filter:loadProject',function(data,rs){
 		db.cypher({
-			query:"MATCH (p:Projects)-[:CREATE_BY|:Assigned]-(u:Users) WHERE ID(u) = "+data.uid+" AND p.status = 'active' RETURN ID(p) as id,p.title as name",
+			query:"MATCH (p:Projects)-[:Create|:Assigned]-(u:Users) WHERE ID(u) = "+data.uid+" AND p.status = 'active' RETURN ID(p) as id,p.title as name",
 		},function(err,results){
 			if (err) console.log(err);
 			if(!results || err){
@@ -15,7 +15,7 @@ module.exports = function (socket,db) {
 
 	socket.on('filter:loadUser',function(data,rs){
 		db.cypher({
-			query:"MATCH (ua:Users)-[:CREATE_BY|:Assigned]-(p:Projects)-[:CREATE_BY|:Assigned]-(u:Users) " +
+			query:"MATCH (ua:Users)-[:Create|:Assigned]-(p:Projects)-[:Create|:Assigned]-(u:Users) " +
 			"WHERE ID(u) = "+data.uid+" " +
 			"RETURN ua.Name as name,ID(ua) as id,ua.Avatar as avatar,ua.Color as color, count(ID(ua)) as count " +
 			"UNION MATCH (u:Users) WHERE ID(u) = "+data.uid+" " +
@@ -32,7 +32,7 @@ module.exports = function (socket,db) {
 
 	socket.on('filter:loadTags',function(data,rs){
 		db.cypher({
-			query:"MATCH (t:Labels)-[:IN]-(p:Projects)-[:CREATE_BY|:Assigned]-(u:Users) " +
+			query:"MATCH (t:Labels)-[:IN]-(p:Projects)-[:Create|:Assigned]-(u:Users) " +
 			"WHERE ID(u) = "+data.uid+" RETURN ID(t) as id,t.color as color,t.bg_color as bg,t.f_color as f,t.text as text;",
 		},function(err,results){
 			if (err) console.log(err);
@@ -49,7 +49,7 @@ module.exports = function (socket,db) {
 		var only_active_project = "(p.status = 'active')";
 		where_all.push(only_active_project);
 		//console.log(data);
-		var project_query = "-[:IN]-(c:Cards)-[:LIVE_IN]-(p:Projects)";
+		var project_query = "-[:IN]-(c:Cards)-[:Child]-(p:Projects)";
 		if (data.filter.project.length > 0) {
 			var project_where = [];
 			for (var i in data.filter.project) {
