@@ -34,6 +34,22 @@
   padding-left: 10px;
   background: #444;
 }
+#projects .task_nav_bar .active {
+  display: inline-block;
+  cursor: pointer;
+}
+#projects .task_nav_bar .active::after {
+  content: ">";
+  color: #FFF;
+  margin: 0 10px;
+  display: inline-block;
+  cursor: default;
+}
+#projects .task_nav_bar .deactive {
+  display: inline-block;
+  color: #BBB;
+  cursor: not-allowed;
+}
 #projects .task_panel {
   width: 100%;
   height: calc(100vh - 134px);
@@ -41,6 +57,7 @@
 #projects .task_panel .scroll {
   width: 100%;
   overflow-x: scroll;
+  overflow-y: hidden;
   background: #666;
   height: 600px;
 }
@@ -56,41 +73,146 @@
 #projects .task_panel .scroll .task_list .task_row .task_cell {
   display: table-cell;
 }
-#projects .task_panel .scroll .task_list .task_row .task_cell .task_cell_fixed {
-  width: 320px;
-  height: calc(100vh - 154px);
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel {
+  transition: padding 0.3s;
 }
-#projects .task_panel .scroll .task_list .task_row .task_cell .task_cell_fixed .task_level1 {
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed {
+  width: 320px;
+  opacity: 1;
+  transition: width 0.5s, opacity 0.3s;
+}
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 {
   background: #AAA;
   margin: 5px;
   border-radius: 20px 20px 10px 10px;
 }
-#projects .task_panel .scroll .task_list .task_row .task_cell .task_cell_fixed .task_level1 .task_header {
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_header {
   padding: 0px 10px;
   line-height: 30px;
-  background: #03a9f4;
+  background: #333;
   color: #FFF;
   border-radius: 10px 10px 0px 0px;
+  position: relative;
 }
-#projects .task_panel .scroll .task_list .task_row .task_cell .task_cell_fixed .task_level1 .task_child {
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_header .addTaskLv1Input {
+  height: 25px;
+  margin-bottom: 0px;
+  border-bottom: 0px;
+}
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_header .addTaskLv1Input:focus {
+  box-shadow: none;
+}
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_header .expand_icon {
+  line-height: 20px;
+  height: 20px;
+  width: 50px;
+  font-size: 14px;
+  display: inline-block;
+  vertical-align: middle;
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  cursor: pointer;
+  text-align: right;
+}
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_child {
   padding: 5px 10px;
 }
-#projects .task_panel .scroll .task_list .task_row .task_cell .task_cell_fixed .task_level1 .task_child .task_2_cover .task_level2 {
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_child .scrollTaskList {
+  width: inherit !important;
+  height: calc(100vh - 194px) !important;
+}
+#projects .task_panel .scroll .task_list .task_row .add_task_panel {
+  display: table-cell;
+  vertical-align: top;
+  height: calc(100vh - 153px) !important;
+  padding: 5px;
+  box-sizing: border-box;
+}
+#projects .task_panel .scroll .task_list .task_row .add_task_panel .add_tab {
+  display: block;
+  background: #444;
+  height: 100%;
+  widtH: 50px;
+  line-height: calc(100vh - 155px) !important;
+  text-align: center;
+  border-radius: 50px;
+  cursor: pointer;
+}
+#projects .task_panel .scroll .task_list .task_row .add_task_panel .add_tab i {
+  font-size: 36px;
+  color: #FFF;
+}
+.task_2_cover .task_level2 {
   transition: padding 0.3s;
+  padding: 0px 0;
 }
-#projects .task_panel .scroll .task_list .task_row .task_cell .task_cell_fixed .task_level1 .task_child .task_2_cover .task_level2 .task_2_panel {
+.task_2_cover .task_level2 .task_2_panel {
   background: #FFF;
-  border-radius: 10px 10px 5px 5px;
+  border-radius: 5px 5px 5px 5px;
   width: 290px;
+  overflow: hidden;
 }
-#projects .task_panel .scroll .task_list .task_row .task_cell .task_cell_fixed .task_level1 .task_child .task_2_cover .task_level2 .task_2_panel .task_2_header {
+.task_2_cover .task_level2 .task_2_panel .task_2_header {
   padding: 0px 10px;
   line-height: 30px;
   color: #666;
   background: #EEE;
-  border-radius: 5px 5px 0px 0px;
 }
-#projects .task_panel .scroll .task_list .task_row .task_cell .task_cell_fixed .task_level1 .task_child .task_2_cover .task_level2 .task_2_panel .task_2_detail {
+.task_2_cover .task_level2 .task_2_panel .task_2_header .addTaskLv2Input {
+  line-height: 30px;
+  margin: 0;
+  border-bottom: 0px;
+}
+.task_2_cover .task_level2 .task_2_panel .task_2_header .addTaskLv2Input:focus {
+  border-bottom: 0px;
+  box-shadow: none;
+}
+.task_2_cover .task_level2 .task_2_panel .task_2_detail {
   padding: 10px;
   color: #999;
+  max-height: 500px;
+  transition: max-height 0.3s;
+}
+.task_2_cover .add_preview {
+  height: 0px;
+  overflow: hidden;
+  transition: opacity 0.5s, height 0.5s, padding 0.5s;
+}
+.move_able {
+  position: absolute;
+}
+.move_able .task_level2 .task_2_panel {
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.5), 0px 0px 2px rgba(0, 0, 0, 0.5);
+}
+.move_able .task_level2 .task_2_panel .task_2_detail {
+  max-height: 100px;
+  overflow: hidden;
+  transition: max-height 0.3s;
+}
+.new_task_lv2 {
+  border-radius: 50px;
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  color: #FFF;
+}
+.new_task_lv2 .move_preview {
+  transition: padding 0.3s;
+}
+.new_task_lv2 .move_preview .add_btn_panel {
+  background: rgba(100, 100, 100, 0.2);
+  border-radius: 20px;
+  line-height: 30px;
+  font-size: 30px;
+}
+.new_task_lv2 .move_preview .add_btn_panel i {
+  transition: padding 0.3s;
+  font-size: 30px;
+  vertical-align: middle;
+  margin-bottom: 2px;
+  cursor: pointer;
+}
+.alpha {
+  opacity: 0.5;
 }
