@@ -1,3 +1,4 @@
+require('dotenv').config();
 var neo4j = require('neo4j');
 var config = {
     port: 5000,
@@ -6,4 +7,24 @@ var config = {
     neo4jPASS:  process.env.NEO4JPASS ||'orisma'
 };
 var db = new neo4j.GraphDatabase('http://'+config.neo4jUSER+':'+config.neo4jPASS+'@'+config.neo4jURL);
-console.log(1);
+var query = "MATCH (u:Users) WHERE ID(u)=0 RETURN u";
+db.cypher({
+    query:query
+},function(err,results) {
+    if (err) {
+        console.log(err);
+    } else {
+        if (results.length == 0) {
+            var create_unassigned_user = "CREATE (u:Users{Name:'Unassigned'})";
+            db.cypher({
+                query:create_unassigned_user
+            },function(err,results) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log("User Unassigned Created");
+                }
+            });
+        }
+    }
+});

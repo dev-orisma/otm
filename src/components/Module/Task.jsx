@@ -256,7 +256,12 @@ module.exports = {
 	},
 	setStatusTask(socket,status,tid,cb){
 		cb = arguments[arguments.length - 1]
-		socket.emit('task:changeStatus', {status:status,tid:tid,user_name:localStorage.name,uuid:localStorage.uid}, (result) => {
+		socket.emit('task:changeTaskStatus', {
+			status:status,
+			tid:tid,
+			user_name:localStorage.name,
+			uuid:localStorage.uid
+		}, (result) => {
 			if(!result){
 				cb(false)
 			}else{

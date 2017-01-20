@@ -435,7 +435,8 @@ class TaskDetail extends Component {
                             <textarea className="hiddenInput title" ref="taskTitle"
                                       value={this.state.taskData["t.title"]} onChange={this.changeTitle.bind(this)}
                                       onBlur={this.updateTask.bind(this)}></textarea>
-                            <ContentEditable className="hiddenInput detail" html={this.state.taskData["t.detail"]}
+                            <ContentEditable className="hiddenInput detail"
+                                             html={typeof(this.state.taskData["t.detail"]) != "undefined" && this.state.taskData["t.detail"] != null ? this.state.taskData["t.detail"] : ""}
                                              changeEdit={this.changeEdit.bind(this)}
                                              onChange={this.changeDetail.bind(this)}
                                              onBlur={this.updateTask.bind(this)}/>
@@ -457,7 +458,6 @@ class TaskDetail extends Component {
                                 </Dropzone>
                                 <div id="attachment-detail">
                                     { this.state.attachments.map((at_item, i)=>
-
                                             <div id={"att-" + at_item.id} className="attachemnt-item"
                                                  key={"attachemnt-" + this.state.taskId + "-" + i}>
                                                 <a href={"/uploads/attachment/" + at_item["a.file_name"]} target="_blank">
@@ -588,6 +588,7 @@ class TaskDetail extends Component {
 }
 class StatusAction extends Component {
     checkStatusActive() {
+        //console.log("active",this.props.status);
         if (this.props.status == "active") {
             return "block";
         } else {
@@ -595,8 +596,18 @@ class StatusAction extends Component {
         }
     }
 
-    checkStatusInactive() {
-        if (this.props.status != "active") {
+    checkStatusComplete() {
+        //console.log("complete",this.props.status);
+        if (this.props.status == "complete") {
+            return "block";
+        } else {
+            return "none";
+        }
+    }
+
+    checkStatusArchive() {
+        //console.log("archive",this.props.status);
+        if (this.props.status == "archive") {
             return "block";
         } else {
             return "none";
@@ -613,16 +624,18 @@ class StatusAction extends Component {
                     <button type="button" className="btn blue" onClick={this.props.changeStatus.bind(this, 'archive')}>
                         Archive
                     </button>
-                    <button type="button" className="btn red" onClick={this.props.changeStatus.bind(this, 'trash')}>
-                        Trash
-                    </button>
                 </div>
-                <div style={{display: this.checkStatusInactive()}}>
+                <div style={{display: this.checkStatusComplete()}}>
                     <button type="button" className="btn orange" onClick={this.props.changeStatus.bind(this, 'active')}>
                         Make Active
                     </button>
                     <button type="button" className="btn blue" onClick={this.props.changeStatus.bind(this, 'archive')}>
                         Archive
+                    </button>
+                </div>
+                <div style={{display: this.checkStatusArchive()}}>
+                    <button type="button" className="btn orange" onClick={this.props.changeStatus.bind(this, 'active')}>
+                        Make Active
                     </button>
                 </div>
             </div>
