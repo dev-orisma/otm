@@ -1,5 +1,42 @@
 module.exports = function (socket,db) {
 	//Task===============//
+	function getProjectDataQuery(input_parent,pid) {
+		var parent = input_parent.split("-")[1];
+		var query = "MATCH (t:Tasks)-[:PARENT]->" +
+		(input_parent == "root" ? "(pt:Projects) WHERE ID(pt) = "+pid+" "
+			:"(pt:Tasks) WHERE ID(pt) = "+parent+" " ) +
+		"AND t.status<>'archive' " +
+		"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
+		"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
+		"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
+		"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
+		"OPTIONAL MATCH (l:Labels)-[:IN]->(tc) " +
+		"OPTIONAL MATCH (tc)<-[:Assigned]-(tcu:Users)" +
+		"WITH t,tc,tcu,nt,pt,ntc,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as c_tag " +
+		"RETURN " +
+		"ID(t) as t_id," +
+		"t.title as header," +
+		"t.startDate as startDate," +
+		"t.endDate as endDate," +
+		"t.detail as detail," +
+		"COUNT(tc) as child_count," +
+		"ID(nt) as next," +
+		(input_parent == "root" ? "'root' as parent," : "ID(pt) as parent,")+
+		"COLLECT({t_id:ID(tc)," +
+			"a_id:ID(tcu)," +
+			"a_name:tcu.Name," +
+			"a_avatar:tcu.Avatar," +
+			"a_color:tcu.Color," +
+			"header:tc.title," +
+			"startDate:tc.startDate," +
+			"endDate:tc.endDate," +
+			"detail:tc.detail," +
+			"next:ID(ntc)," +
+			"tag:c_tag," +
+			"child_count:child_count}" +
+		") as childData";
+		return query;
+	}
 	function listUpdateTask(data,cb){
 		cb = arguments[arguments.length - 1]
 		db.cypher({
@@ -101,62 +138,9 @@ module.exports = function (socket,db) {
 				console.log(err);
 			}else{
 				var queryUpdateData = "";
-				if (data.load_index == "root") {
-					queryUpdateData = "MATCH (t:Tasks)-[:PARENT]->(p:Projects) WHERE ID(p) = "+data.pid+" " +
-						"AND t.status<>'archive' " +
-						"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
-						"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
-						"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
-						"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
-						"OPTIONAL MATCH (l:Labels)-[:IN]->(tc) " +
-						"WITH t,tc,nt,ntc,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as c_tag " +
-						"RETURN " +
-						"ID(t) as t_id," +
-						"t.title as header," +
-						"t.startDate as startDate," +
-						"t.endDate as endDate," +
-						"t.detail as detail," +
-						"COUNT(tc) as child_count," +
-						"ID(nt) as next," +
-						"'root' as parent," +
-						"COLLECT({t_id:ID(tc)," +
-							"header:tc.title," +
-							"startDate:tc.startDate," +
-							"endDate:tc.endDate," +
-							"detail:tc.detail," +
-							"next:ID(ntc)," +
-							"tag:c_tag," +
-							"child_count:child_count}" +
-						") as childData";
-				} else {
-					var load_index = data.load_index.split("-")[1];
-					queryUpdateData = "MATCH (t:Tasks)-[:PARENT]->(pt:Tasks) WHERE ID(pt) = "+load_index+" " +
-						"AND t.status<>'archive' " +
-						"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
-						"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
-						"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
-						"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
-						"OPTIONAL MATCH (l:Labels)-[:IN]->(tc) " +
-						"WITH t,tc,nt,pt,ntc,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as c_tag " +
-						"RETURN " +
-						"ID(t) as t_id," +
-						"t.title as header," +
-						"t.startDate as startDate," +
-						"t.endDate as endDate," +
-						"t.detail as detail," +
-						"COUNT(tc) as child_count," +
-						"ID(nt) as next," +
-						"ID(pt) as parent," +
-						"COLLECT({t_id:ID(tc)," +
-							"header:tc.title," +
-							"startDate:tc.startDate," +
-							"endDate:tc.endDate," +
-							"detail:tc.detail," +
-							"next:ID(ntc)," +
-							"tag:c_tag," +
-							"child_count:child_count}" +
-						") as childData";
-				}
+				var load_index = data.load_index.split("-")[1];
+				queryUpdateData = getProjectDataQuery(data.load_index,data.pid);
+
 				console.log(queryUpdateData);
 				db.cypher({
 					query:queryUpdateData
@@ -172,62 +156,7 @@ module.exports = function (socket,db) {
 	});
 	socket.on("task:loadTaskList",function(data,rs) {
 		var parent =  data.parent.split("-")[1];
-		if (data.parent == "root") {
-			query = (data.parent == "root" ? "MATCH (t:Tasks)-[:PARENT]->(p:Projects) WHERE ID(p) = "+data.pid+" " +
-				"AND t.status<>'archive' "
-				: "MATCH (t:Tasks)-[:PARENT]->(pt:Tasks) WHERE ID(pt) = "+parent+" ") +
-				"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
-				"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
-				"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
-				"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
-				"OPTIONAL MATCH (l:Labels)-[:IN]->(tc) " +
-				"WITH t,tc,nt,ntc,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as c_tag " +
-				"RETURN " +
-				"ID(t) as t_id," +
-				"t.title as header," +
-				"t.startDate as startDate," +
-				"t.endDate as endDate," +
-				"t.detail as detail," +
-				"COUNT(tc) as child_count," +
-				"ID(nt) as next," +
-				"'root' as parent," +
-				"COLLECT({t_id:ID(tc)," +
-					"header:tc.title," +
-					"startDate:tc.startDate," +
-					"endDate:tc.endDate," +
-					"detail:tc.detail," +
-					"next:ID(ntc)," +
-					"tag:c_tag," +
-					"child_count:child_count}" +
-				") as childData";
-		} else {
-			query = "MATCH (t:Tasks)-[:PARENT]->(pt:Tasks) WHERE ID(pt) = "+parent+" " +
-				"AND t.status<>'archive' " +
-				"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
-				"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
-				"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
-				"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
-				"OPTIONAL MATCH (l:Labels)-[:IN]->(tc) " +
-				"WITH t,tc,nt,ntc,pt,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as c_tag " +
-				"RETURN " +
-				"ID(t) as t_id," +
-				"t.title as header," +
-				"t.startDate as startDate," +
-				"t.endDate as endDate," +
-				"t.detail as detail," +
-				"COUNT(tc) as child_count," +
-				"ID(nt) as next," +
-				"ID(pt) as parent," +
-				"COLLECT({t_id:ID(tc)," +
-					"header:tc.title," +
-					"startDate:tc.startDate," +
-					"endDate:tc.endDate," +
-					"detail:tc.detail," +
-					"next:ID(ntc)," +
-					"tag:c_tag," +
-					"child_count:child_count}" +
-				") as childData";
-		}
+		query = getProjectDataQuery(data.parent,data.pid);
 		console.log("\n======== Load Data =========\n"+query+"\n============================\n");
 		db.cypher({
 			query:query

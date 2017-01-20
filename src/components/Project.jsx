@@ -10,6 +10,7 @@ import TaskDetail from './TaskDetail'
 import Router from 'react-router/BrowserRouter'
 import Match from 'react-router/Match'
 import Redirect from 'react-router/Redirect'
+import Avatar from './Avatar';
 import NavigationPrompt from 'react-router/NavigationPrompt'
 var _ = require('lodash')
 const MatchWhenAuthorized = ({component: Component, ...rest}) => (
@@ -617,7 +618,11 @@ class AddTaskLv1 extends Component {
             $(this.taskHeaderInput).focus();
         }, 10);
     }
-
+    newTaskKeyEvent(event) {
+        if (event.key == "Enter") {
+            this.calculateNewTask();
+        }
+    }
     calculateNewTask() {
         if ($(this.taskHeaderInput).val().length == 0) {
             $(this.fixedPanel).css("width", "0px");
@@ -629,7 +634,6 @@ class AddTaskLv1 extends Component {
             this.props.calculateAddTask(null, $(this.taskHeaderInput).val());
         }
     }
-
     render() {
         return (
             <div className="task_cell">
@@ -640,7 +644,7 @@ class AddTaskLv1 extends Component {
                             <div className="task_header">
                                 <input className="addTaskLv1Input" type="text"
                                        ref={(inputTaskHeader) => this.taskHeaderInput = inputTaskHeader}
-                                       onBlur={this.calculateNewTask.bind(this)}/>
+                                       onBlur={this.calculateNewTask.bind(this)} onKeyUp={this.newTaskKeyEvent.bind(this)}/>
                             </div>
                             <div className="task_child">
                                 <Scrollbars className="scrollTaskList">
@@ -663,7 +667,11 @@ class AddTaskLv2 extends Component {
             $(this.taskHeaderInput).focus();
         }, 10);
     }
-
+    newTaskKeyEvent(event) {
+        if (event.key == "Enter") {
+            this.calculateNewTask();
+        }
+    }
     calculateNewTask() {
         if ($(this.taskHeaderInput).val().length == 0) {
             $(this.fixedPanel).css("height", "0px");
@@ -685,7 +693,7 @@ class AddTaskLv2 extends Component {
                         <div className="task_2_header">
                             <input className="addTaskLv2Input" type="text"
                                    ref={(inputTaskHeader) => this.taskHeaderInput = inputTaskHeader}
-                                   onBlur={this.calculateNewTask.bind(this)}/>
+                                   onBlur={this.calculateNewTask.bind(this)} onKeyUp={this.newTaskKeyEvent.bind(this)}/>
                         </div>
                     </div>
                 </div>
@@ -931,7 +939,6 @@ class TaskLevel2 extends Component {
         position: null,
         displayTimeout: null,
     }
-
     componentDidUpdate() {
         if (this.props.previewMode == false && this.props.movingElement != this.props.parent) {
             //console.log(dropZoneX,dropZoneY);
@@ -1012,7 +1019,11 @@ class TaskLevel2 extends Component {
             clearTimeout(this.state.displayTimeout);
         }
     }
-
+    dateFormat(date_long) {
+        var month_array=["Jan","Feb","Mar","Apr","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        var date = new Date(parseFloat(date_long));
+        return date.getDate()+" "+month_array[date.getMonth()]+" "+date.getFullYear();
+    }
     render() {
         var position = {};
         if (this.props.previewMode == true && this.props.dragZone != null) {
@@ -1032,7 +1043,6 @@ class TaskLevel2 extends Component {
                 bottomMargin = "60px";
             }
         }
-        console.log(this.props.taskData.tag);
         return (
             <div className={"task_2_cover " + (this.props.previewMode == true ? "move_able" : "")}
                  ref={(dropZone) => this.dropZone = dropZone}
@@ -1044,10 +1054,22 @@ class TaskLevel2 extends Component {
                              onMouseDown={this.addMoveAble.bind(this)}
                              onMouseUp={this.removeMoveAble.bind(this)}
                              onClick={this.props.openTaskDetail.bind(this,this.props.taskId)}>
-                            {this.props.taskData.header}
+                            <div className="task_2_head">
+                                {this.props.taskData.header}
+                            </div>
                         </div>
                         <div className="task_2_detail">
+                            {this.props.taskData.a_id != 0 ?
+                                <div className="avatar">
+                                    <Avatar name={this.props.taskData.a_name}
+                                            avatar={this.props.taskData.a_avatar}
+                                            color={this.props.taskData.a_color}/>
+                                </div>
+                            :null}
                             {this.props.taskData.detail}
+                        </div>
+                        <div className="due_date">
+                            {this.dateFormat(this.props.taskData.endDate)}
                         </div>
                         {typeof(this.props.taskData.tag) != "undefined" && this.props.taskData.tag.length > 0 ?
                             <div className="task_label">
@@ -1060,13 +1082,13 @@ class TaskLevel2 extends Component {
                                 <div className="clear_fix"></div>
                             </div> : null
                         }
-                        <div className="bottom_space"></div>
                         {this.props.taskData.child_count > 0 ?
                         <div className="child_task" onClick={this.props.switchTaskIndex.bind(this,this.props.taskId)}>
                             <i className="material-icons">toc</i>
                             {this.props.taskData.child_count}
                         </div>
                             :null}
+                        <div className="bottom_space"></div>
                     </div>
                 </div>
             </div>

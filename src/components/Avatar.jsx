@@ -21,7 +21,7 @@ class Avatar extends Component {
             avatar = this.props.avatar;
             color = this.props.color;
         }
-        if (typeof(this.props.avatar) != "undefined" && avatar.length > 0) {
+        if (typeof(this.props.avatar) != "undefined" && this.props.avatar != null && avatar.length > 0) {
             return (
                 <div className='user_display'>
                     <div className="user_tooltips" style={{display:this.state.userTooltipDisplay}}>
