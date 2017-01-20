@@ -9,6 +9,9 @@ class Login extends Component {
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 	}
+  componentDidMount() {
+    document.title = "Login Page"
+  }
 
 	handleSubmit(event) {
 		event.preventDefault()

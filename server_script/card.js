@@ -2,7 +2,7 @@ module.exports = function (socket,db) {
 	//card===============//
 socket.on('card:add',function(data,rs){
 	db.cypher({
-		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (c:Cards {title:"'+data.title+'",color:"black",icon:"info_outline",position:'+data.sortNum+'}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(c)-[:LIVE_IN]->(p) RETURN ID(c)',
+		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (c:Cards {title:"'+data.title+'",color:"black",icon:"info_outline",position:'+data.sortNum+'}) CREATE (u)-[:Create {date:"'+data.at_create+'"}]->(c)-[:Child]->(p) RETURN ID(c)',
 	},function(err,results){
 		if (err) {
 			console.log(err);
@@ -28,7 +28,7 @@ socket.on('card:add',function(data,rs){
 });
 socket.on('card:list',function(data,rs){
 	db.cypher({
-		query:'MATCH (p:Projects) WHERE ID(p) = '+data.pid+' AND p.status = "active" OPTIONAL MATCH (c:Cards)-[r:LIVE_IN]->(p) RETURN p.title,ID(c),c ORDER BY c.position ASC',
+		query:'MATCH (p:Projects) WHERE ID(p) = '+data.pid+' AND p.status = "active" OPTIONAL MATCH (c:Cards)-[r:Child]->(p) RETURN p.title,ID(c),c ORDER BY c.position ASC',
 	},function(err,results){
 		if (err) {console.log(err); rs(false);}else{
 
@@ -54,7 +54,7 @@ socket.on('card:sortlist', function (data,fn) {
 		var process_query = true;
 		data.lists.forEach(function(value,index){
 			db.cypher({
-				query: 'MATCH (c:Cards)-[r:LIVE_IN]->(p:Projects) WHERE ID(p) = '+data.pid+'  AND ID(c) = '+value.id+' SET c.position = '+value.position+' RETURN ID(c)'
+				query: 'MATCH (c:Cards)-[r:Child]->(p:Projects) WHERE ID(p) = '+data.pid+'  AND ID(c) = '+value.id+' SET c.position = '+value.position+' RETURN ID(c)'
 			}, function (err, results) {
 				if (err){
 					console.log(err);
