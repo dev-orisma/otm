@@ -18,6 +18,67 @@ module.exports = {
 			}
 		});
 	},
+    getNav(socket,task_index,cb) {
+        cb = arguments[arguments.length - 1]
+        socket.emit('task:getNav', {
+            task_index:task_index
+        }, (result) => {
+            if(!result) {
+                cb(false)
+            }else{
+                cb(result)
+            }
+        });
+    },
+	addLv1(socket,uid,pid,parent,title,after,load_index,cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:addLv1', {
+			uid:uid,
+			pid:pid,
+			title:title,
+			after:after,
+			parent:parent,
+			load_index:load_index,
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+    moveTask(socket,from_parent,to_parent,taskId,after,before,pid,reload, cb) {
+        cb = arguments[arguments.length - 1]
+        socket.emit('task:moveTask', {
+            from_parent:from_parent,
+            to_parent:to_parent,
+            task_id:taskId,
+            after:after,
+            before:before,
+            pid:pid,
+			reload:reload
+        }, (result) => {
+            if(!result) {
+                cb(false)
+            }else{
+                cb(result)
+            }
+        });
+    },
+	loadTaskList(socket,pid,parent, cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:loadTaskList', {
+			pid:pid,
+			parent:parent,
+			at_create:new Date().getTime()
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
 	save(socket,data,tid,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:save', {tid:tid,data:data}, (result) => {
@@ -195,7 +256,12 @@ module.exports = {
 	},
 	setStatusTask(socket,status,tid,cb){
 		cb = arguments[arguments.length - 1]
-		socket.emit('task:changeStatus', {status:status,tid:tid,user_name:localStorage.name,uuid:localStorage.uid}, (result) => {
+		socket.emit('task:changeTaskStatus', {
+			status:status,
+			tid:tid,
+			user_name:localStorage.name,
+			uuid:localStorage.uid
+		}, (result) => {
 			if(!result){
 				cb(false)
 			}else{

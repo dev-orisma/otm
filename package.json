@@ -10,7 +10,7 @@
     "forever_stop": "forever stop server.js",
     "lint": "eslint --ext .js,.jsx src",
     "lintfix": "eslint --ext .js,.jsx src --fix",
-    "postinstall": "webpack -p --config webpack.prod.config.js"
+    "postinstall": "node create_unassigned.js && cp .env.sample .env"
   },
   "author": "",
   "license": "ISC",

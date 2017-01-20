@@ -58,7 +58,264 @@ module.exports = function (socket,db) {
 			})
 		});
 	}
+	socket.on("task:addLv1",function(data,rs) {
+		console.log(data);
+		var parent_query = "";
+		var relation_parent = "";
+		var prev_query = "";
+		var order_relation = "";
+		if (data.parent != "root") {
+			var parent = data.parent.split("-")[1];
+			parent_query = " MATCH (t_parent:Tasks) WHERE ID(t_parent) = "+parent;
+			relation_parent = ",(t_parent)<-[:PARENT]-(t)";
+		} else {
+			relation_parent = ",(p)<-[:PARENT]-(t)";
+		}
+		if (data.after != null) {
+			console.log("need update order");
+			var after_split = data.after.split("-");
+			var update_id = parseInt(after_split[1]);
+			console.log("update "+ update_id);
+			prev_query = " MATCH (pt:Tasks) WHERE ID(pt) = "+update_id;
+			//order_relation = ",(pt)<-[:PREV]-(t) ,(pt)-[:NEXT]->(t)";
+			order_relation = ",(pt)-[:NEXT]->(t)";
+		}
+		var query = "MATCH (p:Projects) WHERE ID(p)="+data.pid+
+			" MATCH (u:Users) WHERE ID(u)="+data.uid+" " +
+			" MATCH (uz:Users) WHERE ID(uz)=0 "+
+			prev_query+
+			parent_query+
+			" CREATE (t:Tasks{title:'"+data.title+"'" +
+					",startDate:'"+new Date().getTime()+"'" +
+					",endDate:'"+(new Date().getTime() + 86400000)+"'" +
+					",status:'active'})" +
+			",(t)-[:LIVE_IN]->(p)" +
+			",(t)<-[:Assigned {date:'"+data.at_create+"'}]-(uz)" +
+			",(t)-[:CREATE_BY{date:"+new Date().getTime()+"}]->(u)"+
+			order_relation+
+			relation_parent;
+		db.cypher({
+			query:query
+		},function(err,results){
+			if (err) {
+				console.log(err);
+			}else{
+				var queryUpdateData = "";
+				if (data.load_index == "root") {
+					queryUpdateData = "MATCH (t:Tasks)-[:PARENT]->(p:Projects) WHERE ID(p) = "+data.pid+" " +
+						"AND t.status<>'archive' " +
+						"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
+						"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
+						"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
+						"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
+						"OPTIONAL MATCH (l:Labels)-[:IN]->(tc) " +
+						"WITH t,tc,nt,ntc,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as c_tag " +
+						"RETURN " +
+						"ID(t) as t_id," +
+						"t.title as header," +
+						"t.startDate as startDate," +
+						"t.endDate as endDate," +
+						"t.detail as detail," +
+						"COUNT(tc) as child_count," +
+						"ID(nt) as next," +
+						"'root' as parent," +
+						"COLLECT({t_id:ID(tc)," +
+							"header:tc.title," +
+							"startDate:tc.startDate," +
+							"endDate:tc.endDate," +
+							"detail:tc.detail," +
+							"next:ID(ntc)," +
+							"tag:c_tag," +
+							"child_count:child_count}" +
+						") as childData";
+				} else {
+					var load_index = data.load_index.split("-")[1];
+					queryUpdateData = "MATCH (t:Tasks)-[:PARENT]->(pt:Tasks) WHERE ID(pt) = "+load_index+" " +
+						"AND t.status<>'archive' " +
+						"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
+						"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
+						"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
+						"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
+						"OPTIONAL MATCH (l:Labels)-[:IN]->(tc) " +
+						"WITH t,tc,nt,pt,ntc,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as c_tag " +
+						"RETURN " +
+						"ID(t) as t_id," +
+						"t.title as header," +
+						"t.startDate as startDate," +
+						"t.endDate as endDate," +
+						"t.detail as detail," +
+						"COUNT(tc) as child_count," +
+						"ID(nt) as next," +
+						"ID(pt) as parent," +
+						"COLLECT({t_id:ID(tc)," +
+							"header:tc.title," +
+							"startDate:tc.startDate," +
+							"endDate:tc.endDate," +
+							"detail:tc.detail," +
+							"next:ID(ntc)," +
+							"tag:c_tag," +
+							"child_count:child_count}" +
+						") as childData";
+				}
+				console.log(queryUpdateData);
+				db.cypher({
+					query:queryUpdateData
+				},function(err,results) {
+					if (err) {
+						console.log(err);
+					} else {
+						rs(results);
+					}
+				});
+			}
+		});
+	});
+	socket.on("task:loadTaskList",function(data,rs) {
+		var parent =  data.parent.split("-")[1];
+		if (data.parent == "root") {
+			query = (data.parent == "root" ? "MATCH (t:Tasks)-[:PARENT]->(p:Projects) WHERE ID(p) = "+data.pid+" " +
+				"AND t.status<>'archive' "
+				: "MATCH (t:Tasks)-[:PARENT]->(pt:Tasks) WHERE ID(pt) = "+parent+" ") +
+				"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
+				"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
+				"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
+				"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
+				"OPTIONAL MATCH (l:Labels)-[:IN]->(tc) " +
+				"WITH t,tc,nt,ntc,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as c_tag " +
+				"RETURN " +
+				"ID(t) as t_id," +
+				"t.title as header," +
+				"t.startDate as startDate," +
+				"t.endDate as endDate," +
+				"t.detail as detail," +
+				"COUNT(tc) as child_count," +
+				"ID(nt) as next," +
+				"'root' as parent," +
+				"COLLECT({t_id:ID(tc)," +
+					"header:tc.title," +
+					"startDate:tc.startDate," +
+					"endDate:tc.endDate," +
+					"detail:tc.detail," +
+					"next:ID(ntc)," +
+					"tag:c_tag," +
+					"child_count:child_count}" +
+				") as childData";
+		} else {
+			query = "MATCH (t:Tasks)-[:PARENT]->(pt:Tasks) WHERE ID(pt) = "+parent+" " +
+				"AND t.status<>'archive' " +
+				"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
+				"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
+				"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
+				"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
+				"OPTIONAL MATCH (l:Labels)-[:IN]->(tc) " +
+				"WITH t,tc,nt,ntc,pt,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as c_tag " +
+				"RETURN " +
+				"ID(t) as t_id," +
+				"t.title as header," +
+				"t.startDate as startDate," +
+				"t.endDate as endDate," +
+				"t.detail as detail," +
+				"COUNT(tc) as child_count," +
+				"ID(nt) as next," +
+				"ID(pt) as parent," +
+				"COLLECT({t_id:ID(tc)," +
+					"header:tc.title," +
+					"startDate:tc.startDate," +
+					"endDate:tc.endDate," +
+					"detail:tc.detail," +
+					"next:ID(ntc)," +
+					"tag:c_tag," +
+					"child_count:child_count}" +
+				") as childData";
+		}
+		console.log("\n======== Load Data =========\n"+query+"\n============================\n");
+		db.cypher({
+			query:query
+		},function(err,results) {
+			if (err) {
+				console.log(err);
+			} else {
+				console.log(results);
+				rs(results);
+			}
+		});
+	});
+	socket.on("task:moveTask",function(data,rs) {
+		if (data.task_id != data.to_parent) {
+			var task_id = data.task_id.split("-")[1];
+			var to_parent = data.to_parent.split("-")[1];
+			var after = null;
+			var before = null;
+			if (data.after != null) {
+				after = data.after.split("-")[1];
+			}
+			if (data.before != null) {
+				before = data.before.split("-")[1];
+			}
+			var query = "MATCH (move_task:Tasks) WHERE ID(move_task) = "+task_id +
+				(data.from_parent == "root" ? " OPTIONAL MATCH (move_task)-[from_parent_relation:PARENT]->(from_parent:Projects)"
+					: " OPTIONAL MATCH (move_task)-[from_parent_relation:PARENT]->(from_parent:Tasks)" )+
+				" OPTIONAL MATCH (current_before:Tasks)-[current_before_relation:NEXT]->(move_task)" +
+				" OPTIONAL MATCH (move_task)-[current_after_relation:NEXT]->(current_after:Tasks)" +
+				(data.to_parent == "root" ? " OPTIONAL MATCH (to_parent:Projects) WHERE ID(to_parent) = "+data.pid
+					: " OPTIONAL MATCH (to_parent:Tasks) WHERE ID(to_parent) = "+to_parent)+
+				(after != null ? " OPTIONAL MATCH (to_after:Tasks) WHERE ID(to_after) = "+after +
+				" OPTIONAL MATCH (to_after)-[to_replace_relation:NEXT]->(to_next:Tasks)" : "")+
+				(before != null ? " OPTIONAL MATCH (to_before:Tasks) WHERE ID(to_before) = "+before : "" ) +
+				" DELETE current_before_relation,current_after_relation" +
+				" FOREACH (o IN CASE WHEN current_before IS NOT NULL AND current_after IS NOT NULL THEN [current_before] ELSE [] END | "+
+				" MERGE (current_before)-[:NEXT]->(current_after)" +
+				" ) " +
+				" FOREACH (o IN CASE WHEN from_parent <> to_parent THEN [from_parent] ELSE [] END | "+
+				" DELETE from_parent_relation" +
+				" MERGE (move_task)-[:PARENT]->(to_parent)" +
+				" ) " +
+				(after != null ?
+				" FOREACH (o IN CASE WHEN to_next IS NOT NULL THEN [to_next] ELSE [] END | "+
+				" MERGE (move_task)-[:NEXT]->(to_next)" +
+				" ) " +
+				" FOREACH (o IN CASE WHEN to_after IS NOT NULL THEN [to_next] ELSE [] END | "+
+				" DELETE to_replace_relation" +
+				" MERGE (to_after)-[:NEXT]->(move_task)" +
+				" ) ":"") +
+				(before != null ?
+				" FOREACH (o IN CASE WHEN to_before IS NOT NULL THEN [to_before] ELSE [] END | "+
+				" MERGE (move_task)-[:NEXT]->(to_before)" +
+				" ) " : "");
 
+			/*			" CREATE (current_before)-[:NEXT]->(current_after)," +
+			 "(move_task)-[:PARENT]->(to_parent)," +
+			 "(to_after)-[:NEXT]->(move_task)," +
+			 "(move_task)-[:NEXT]->(to_next)";*/
+
+			console.log("\n======== Move Query =========\n"+query+"\n============================\n");
+			db.cypher({
+				query:query
+			},function(err,results) {
+				if (err) {
+					console.log(err);
+				} else {
+					rs(results);
+				}
+			});
+		}
+	});
+
+	socket.on("task:getNav",function(data,rs) {
+		var task_index = data.task_index.split("-")[1];
+		var query = "MATCH (ct:Tasks)-[:PARENT*0..]->(t:Tasks) WHERE ID(ct) = "+task_index+" RETURN COLLECT({t_id:ID(t),title:t.title}) as parent";
+		console.log("\n======== Get Navigator =========\n"+query+"\n============================\n");
+		db.cypher({
+			query:query
+		},function(err,results) {
+			if (err) {
+				console.log(err);
+			} else {
+				console.log(results);
+				rs(results);
+			}
+		});
+	});
 
 	socket.on('task:add',function(data,rs){
 		let sql_card = ''
@@ -66,7 +323,10 @@ module.exports = function (socket,db) {
 			sql_card = ' CREATE (t)-[:Parent]->(c) '
 		}
 		db.cypher({
-			query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' MATCH (uz:Users) WHERE ID(uz)=0 CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",status:"active",cid:'+data.cid+'}) CREATE (u)-[:Create {date:"'+data.at_create+'"}]->(t) '+sql_card+' CREATE (t)-[:IN]->(c) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment {date:"'+data.at_create+'"}]->(cm)-[:IN {date:"'+data.at_create+'"}]->(t) CREATE (uz)-[:Assigned {date:"'+data.at_create+'"}]->(t) RETURN ID(t)',
+			query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' ' +
+			'MATCH (c:Cards) WHERE ID(c) = '+data.cid+' ' +
+			'MATCH (uz:Users) WHERE ID(uz)=0 ' +
+			'CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",status:"active",cid:'+data.cid+'}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t) '+sql_card+' CREATE (t)-[:IN]->(c) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment {date:"'+data.at_create+'"}]->(cm)-[:IN {date:"'+data.at_create+'"}]->(t) CREATE (uz)-[:Assigned {date:"'+data.at_create+'"}]->(t) RETURN ID(t)',
 		},function(err,results){
 			if (err) {
 				console.log(err);
@@ -165,7 +425,7 @@ module.exports = function (socket,db) {
 
 	socket.on('task:listByProject',function(data,rs){
 		db.cypher({
-			query:'MATCH (p:Projects)<-[l:Child]-(c:Cards)<-[:IN]-(t:Tasks) WHERE ID(p) = '+data.pid+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u)',
+			query:'MATCH (p:Projects)<-[l:LIVE_IN]-(c:Cards)<-[:IN]-(t:Tasks) WHERE ID(p) = '+data.pid+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u)',
 		},function(err,results){
 			if (err) console.log(err);
 			var res = [];
@@ -270,8 +530,17 @@ module.exports = function (socket,db) {
 
 	});
 	socket.on('task:get',function(data,rs){
+		console.log(data);
+		var query = 'MATCH (t:Tasks)-[:LIVE_IN]->(p:Projects) ' +
+			'WHERE ID(t) = '+data.tid+' ' +
+			'MATCH (uc:Users)<-[:CREATE_BY]-(t) ' +
+			'OPTIONAL MATCH (ua:Users)-[:Assigned]->(t) ' +
+			'WHERE ID(ua) <> 0 AND ID(t) = '+data.tid+'  ' +
+			'OPTIONAL MATCH (td:Todos)-[:IN]->(t) ' +
+			'RETURN t.title,t.detail,t.startDate,t.endDate,t.status,uc.Name,uc.Avatar,uc.Color,ua.Name,ua.Avatar,ua.Color,ID(ua),COUNT(distinct td) AS todo, t.cid,ID(p),p.title';
+		console.log("\n=============Query Task Data===========\n"+query)+"\n==========================\n";
 		db.cypher({
-			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (uc:Users)-[:Create]->(t) MATCH (c:Cards)<-[r]-(t) MATCH (c)-[:Child]->(p:Projects) OPTIONAL MATCH (ua:Users)-[:Assigned]->(t) WHERE ID(ua) <> 0 AND ID(t) = '+data.tid+'  OPTIONAL MATCH (td:Todos)-[:IN]->(t) RETURN t.title,t.detail,t.startDate,t.endDate,t.status,uc.Name,uc.Avatar,uc.Color,ua.Name,ua.Avatar,ua.Color,ID(ua),COUNT(distinct td) AS todo, t.cid,ID(p),p.title',
+			query:query,
 		},function(err,results){
 			if (err) console.log(err);
 			if(!results || err){
@@ -297,7 +566,7 @@ module.exports = function (socket,db) {
 	});
 	socket.on('task:setStartDate',function(data,rs){
 		db.cypher({
-			query:'MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' MATCH (p:Projects)<-[:Child]-(t) MATCH (u:Users) WHERE ID(u) = '+data.uid+' SET t.startDate = "'+data.time+'"  RETURN t',
+			query:'MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' MATCH (p:Projects)<-[:LIVE_IN]-(t) MATCH (u:Users) WHERE ID(u) = '+data.uid+' SET t.startDate = "'+data.time+'"  RETURN t',
 		},function(err,results){
 			if (err) console.log(err);
 			if(!results || err){
@@ -309,7 +578,7 @@ module.exports = function (socket,db) {
 	});
 	socket.on('task:setEndDate',function(data,rs){
 		db.cypher({
-			query:'MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' MATCH (p:Projects)<-[:Child]-(t) MATCH (u:Users) WHERE ID(u) = '+data.uid+' SET t.endDate = "'+data.time+'" RETURN t',
+			query:'MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' MATCH (p:Projects)<-[:LIVE_IN]-(t) MATCH (u:Users) WHERE ID(u) = '+data.uid+' SET t.endDate = "'+data.time+'" RETURN t',
 		},function(err,results){
 			if (err) console.log(err);
 			if(!results || err){
@@ -344,9 +613,50 @@ module.exports = function (socket,db) {
 			}
 		})
 	});
+
+	socket.on('task:changeTaskStatus',function(data,rs) {
+		console.log(data);
+		var query="";
+		if (data.status == "archive") {
+			query = "MATCH (t:Tasks) WHERE ID(t)=" + data.tid + " OPTIONAL MATCH (sc:Tasks)-[:PARENT*0..]->(c:Tasks)-[:PARENT]->(t) " +
+				"OPTIONAL MATCH (t_prev:Tasks)-[prev_r:NEXT]->(t) " +
+				"OPTIONAL MATCH (t_next:Tasks)<-[next_r:NEXT]-(t) " +
+				"DELETE prev_r,next_r " +
+				"FOREACH (o IN CASE WHEN t_prev IS NOT NULL AND t_next IS NOT NULL THEN [t_prev] ELSE [] END | " +
+					"MERGE (t_prev)-[:NEXT]->(t_next) " +
+				")" +
+				"SET sc.parent_status='" + data.status + "',t.status='"+ data.status +"'";
+		} else if (data.status == "active") {
+			query = "MATCH (t:Tasks) WHERE ID(t) = "+ data.tid +" OPTIONAL MATCH (p)<-[:PARENT]-(t)<-[:PARENT]-(c:Tasks)<-[:PARENT*0..]-(sc:Tasks) " +
+				"OPTIONAL MATCH (at:Tasks)-[:PARENT]->(p) WHERE at.status='active' " +
+				"WITH  t,sc, SIZE(COLLECT(at)) as alis_size,HEAD(COLLECT(at)) as last_alis_node " +
+				"FOREACH (o IN CASE WHEN alis_size>0 AND t.status='archive' THEN [t] ELSE [] END | " +
+					"MERGE (last_alis_node)-[:NEXT]->(t)" +
+				")" +
+				"SET t.status='" + data.status + "' " +
+				"REMOVE sc.parent_status";
+		} else if (data.status == "complete") {
+			query = "MATCH (t:Tasks) WHERE ID(t)=" + data.tid + " OPTIONAL MATCH (sc:Tasks)-[:PARENT*0..]->(c:Tasks)-[:PARENT]->(t) " +
+				"SET sc.parent_status='" + data.status + "',t.status='"+ data.status +"'"
+		}
+		console.log(query);
+		db.cypher({
+			query: query,
+		}, function (err, results) {
+			if (err) {
+				console.log(err);
+			} else if (!results || err) {
+				rs(false)
+			} else {
+				rs(results)
+			}
+		})
+	});
+
 	socket.on('task:changeStatus',function(data,rs){
 		db.cypher({
-			query:'MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' MATCH (u:Users)-[:Assigned]->(t) SET t.status = "'+data.status+'" RETURN t,u.Name,ID(u)',
+			query:'MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' ' +
+			'MATCH (u:Users)-[:Assigned]->(t) SET t.status = "'+data.status+'" RETURN t,u.Name,ID(u)',
 		},function(err,results){
 			if (err) console.log(err);
 			if(!results || err){
@@ -354,7 +664,10 @@ module.exports = function (socket,db) {
 			}else{
 				if((data.status === "active" || data.status === "complete" || data.status === "archive") && (parseInt(data.uuid) !== parseInt(results[0]['ID(u)']))){
 					db.cypher({
-						query: 'MATCH (u:Users) WHERE ID(u) = '+results[0]['ID(u)']+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"task" ,date:"'+ new Date().getTime() +'",title:"'+data.user_name+' Change status " + t.title + " to '+data.status+'",detail:t.detail,readed:"no",tid:ID(t)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+						query: 'MATCH (u:Users) WHERE ID(u) = '+results[0]['ID(u)']+' ' +
+						'MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' ' +
+						'CREATE (n:Notification {Type:"task" ,date:"'+ new Date().getTime() +'",title:"'+data.user_name+' Change status " + t.title + " to '+data.status+'",detail:t.detail,readed:"no",tid:ID(t)}) ' +
+						'CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
 					}, function (err, rs_notify) {
 						if (err){
 							console.log(err);
@@ -367,7 +680,13 @@ module.exports = function (socket,db) {
 				}
 				if(data.status === "archive" || data.status === "trash"){
 					db.cypher({
-						query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (c:Cards) WHERE ID(c) = t.cid OPTIONAL MATCH (before:Tasks)<-[pp:Parent]-(t)  OPTIONAL MATCH (after:Tasks)-[bp:Parent]->(t) OPTIONAL MATCH (c)<-[bc:Parent]-(t) DELETE bp,pp,bc CREATE (t)-[:Hidden_Parent]->(c) RETURN ID(before),ID(after),ID(c)'
+						query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' ' +
+						'MATCH (c:Cards) WHERE ID(c) = t.cid ' +
+						'OPTIONAL MATCH (before:Tasks)<-[pp:Parent]-(t)  ' +
+						'OPTIONAL MATCH (after:Tasks)-[bp:Parent]->(t) ' +
+						'OPTIONAL MATCH (c)<-[bc:Parent]-(t) DELETE bp,pp,bc ' +
+						'CREATE (t)-[:Hidden_Parent]->(c) ' +
+						'RETURN ID(before),ID(after),ID(c)'
 					}, function (err, rs_r) {
 						if (err){
 							console.log(err);
@@ -375,7 +694,8 @@ module.exports = function (socket,db) {
 
 							if(rs_r[0]['ID(parent)'] && rs_r[0]['ID(after)']){
 								db.cypher({
-									query:'MATCH (t:Tasks) WHERE ID(t)='+rs_r[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_r[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
+									query:'MATCH (t:Tasks) WHERE ID(t)='+rs_r[0]['ID(after)']+' ' +
+									'MATCH (c:Cards) WHERE ID(c)='+rs_r[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
 								},function(err,rs1){
 									if (err) {console.log('before and after',err) }
 								})

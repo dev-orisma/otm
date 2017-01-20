@@ -3,13 +3,13 @@ import {Link} from 'react-router';
 import auth from './Module/Auth';
 import Router from 'react-router/BrowserRouter'
 import Match from 'react-router/Match'
-import Redirect from 'react-router/Redirect'
+//import Redirect from 'react-router/Redirect'
 import Miss from 'react-router/Miss'
 
 
 import Dashboard from './Dashboard'
 import Project from './Project'
-import ProjectDemo from './ProjectDemoFlow'
+//import ProjectDemo from './ProjectDemoFlow'
 import Filter from './Filter'
 import Login from './Login'
 import Logout from './Logout'
@@ -126,7 +126,6 @@ class Navbar extends Component {
 				<Match pattern="/Register" exactly render={({ pathname }) => <Register socket={this.state.socket} /> }/>
 				<MatchWhenAuthorized pattern="/timeline" exactly component={Timeline}/>
 				<MatchWhenAuthorized pattern="/project/:projectId" exactly component={Project} />
-				<MatchWhenAuthorized pattern="/project_demo/:projectId" exactly component={ProjectDemo} />
 				<MatchWhenAuthorized pattern="/task/:taskId" exactly component={Project} />
 				<MatchWhenAuthorized pattern="/filter" exactly component={Filter} />
 
