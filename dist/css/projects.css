@@ -34,21 +34,37 @@
   padding-left: 10px;
   background: #444;
 }
-#projects .task_nav_bar .active {
+#projects .task_nav_bar .level_link {
+  display: inline-block;
+  heighT: 30px;
+}
+#projects .task_nav_bar .level_link .active {
   display: inline-block;
   cursor: pointer;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  line-height: 30px;
 }
-#projects .task_nav_bar .active::after {
-  content: ">";
-  color: #FFF;
-  margin: 0 10px;
-  display: inline-block;
-  cursor: default;
-}
-#projects .task_nav_bar .deactive {
+#projects .task_nav_bar .level_link .deactive {
   display: inline-block;
   color: #BBB;
   cursor: not-allowed;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  line-height: 30px;
+}
+#projects .task_nav_bar .level_link .arrow {
+  display: inline-block;
+  color: #FFF;
+  vertical-align: top;
+  line-height: 30px;
+  margin: 0 5px;
 }
 #projects .task_panel {
   width: 100%;
@@ -94,6 +110,12 @@
   border-radius: 10px 10px 0px 0px;
   position: relative;
 }
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_header .header_text {
+  width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 #projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_header .addTaskLv1Input {
   height: 25px;
   margin-bottom: 0px;
@@ -121,6 +143,23 @@
 #projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_child .scrollTaskList {
   width: inherit !important;
   height: calc(100vh - 194px) !important;
+}
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_child .scrollTaskList .task_detail {
+  background: #bbb;
+  padding: 10px;
+  margin: 5px 0px;
+  border-radius: 5px;
+}
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_child .scrollTaskList .task_detail .task_2_detail .avatar {
+  float: left;
+  display: block;
+  margin: 0px 10px 5px 0px;
+}
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_child .scrollTaskList .task_detail .due_date {
+  color: #be5e2e;
+}
+#projects .task_panel .scroll .task_list .task_row .task_cell .drop_panel .task_cell_fixed .task_level1 .task_child .scrollTaskList .task_detail .task_label .bottom_space {
+  clear: both;
 }
 #projects .task_panel .scroll .task_list .task_row .add_task_panel {
   display: table-cell;
@@ -190,6 +229,7 @@
   float: left;
   vertical-align: bottom;
   line-height: 33px;
+  clear: both;
 }
 .task_2_cover .task_level2 .task_2_panel .task_label {
   position: relative;
@@ -200,7 +240,6 @@
 }
 .task_2_cover .task_level2 .task_2_panel .bottom_space {
   display: block;
-  height: 10px;
   width: 100%;
   clear: both;
 }
@@ -274,7 +313,6 @@
 }
 .move_able .task_level2 .task_2_panel .bottom_space {
   display: block;
-  height: 10px;
   width: 100%;
   clear: both;
 }
