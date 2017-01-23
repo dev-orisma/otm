@@ -25,6 +25,7 @@ module.exports = function (socket,db) {
 			"t.startDate as startDate," +
 			"t.endDate as endDate," +
 			"t.detail as detail," +
+			"t.status as status," +
 			"COUNT(tc) as child_count," +
 			"ID(nt) as next," +
 			"tag as tag," +
@@ -38,6 +39,7 @@ module.exports = function (socket,db) {
 				"startDate:tc.startDate," +
 				"endDate:tc.endDate," +
 				"detail:tc.detail," +
+			"status:tc.status," +
 				"next:ID(ntc)," +
 				"tag:c_tag," +
 				"child_count:child_count}" +

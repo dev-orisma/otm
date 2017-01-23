@@ -108,6 +108,7 @@ class Project extends Component {
             taskChild: taskChild,
             taskIndex: "root",
             moveState: false,
+            mouseMoveZone : null,
             dragZone: null,
             dragFrom: null,
             dragTo: null,
@@ -119,7 +120,8 @@ class Project extends Component {
             addTaskLv1: false,
             addPreview: addPreview,
             taskDetail: [],
-            navigator: []
+            navigator: [],
+            tempDragZoneAction: null,
         }
     };
     closeTaskDetail() {
@@ -303,6 +305,7 @@ class Project extends Component {
         this.setState({addPreview: this.state.addPreview});
     }
     dropElement() {
+        clearTimeout(this.state.tempDragZoneAction);
         this.updateDragZone(null);
         if (this.state.checkDrop == "move" && this.state.dragTo != null && this.state.dragFrom != null
             && (this.state.dragTo.parent != this.state.dragFrom.parent || this.state.dragFrom.taskId != this.state.dragTo.taskId)) {
@@ -423,13 +426,21 @@ class Project extends Component {
                 }
                 this.state.taskData[i].preview = "none";
             }
+            this.setState({dragZone: dragZone});
         }
         if (typeof(window.getSelection) != "undefined") {
             window.getSelection().removeAllRanges();
         } else if (typeof(document.selection) != "undefined") {
             document.selection.empty();
         }
-        this.setState({dragZone: dragZone});
+        this.setState({mouseMoveZone: dragZone});
+        if (this.state.tempDragZoneAction != null) {
+            clearTimeout(this.state.tempDragZoneAction);
+            this.state.tempDragZoneAction = null;
+        }
+        this.state.tempDragZoneAction = setTimeout(() => {
+            this.setState({dragZone: dragZone});
+        },50);
     }
     switchTaskIndex(data) {
         //console.log(data);
@@ -448,6 +459,7 @@ class Project extends Component {
                     taskData={this.state.taskData}
                     taskChild={this.state.taskChild}
                     dragZone={this.state.dragZone}
+                    mouseMoveZone={this.state.mouseMoveZone}
                     dragFrom={this.state.dragFrom}
                     dragTo={this.state.dragTo}
                     parent={this.state.taskIndex}
@@ -586,7 +598,7 @@ class TaskList extends Component {
                                         taskId={taskId}
                                         parent={this.props.taskId}
                                         taskData={this.props.taskData[taskId]}
-                                        dragZone={this.props.dragZone}
+                                        dragZone={this.props.mouseMoveZone}
                                         dragFrom={this.props.dragFrom}
                                         dragTo={this.props.dragTo}
                                         previewMode={true}
@@ -1094,7 +1106,7 @@ class TaskLevel2 extends Component {
                  style={position}>
                 <div className="task_level2" ref={(dropZoneDisplay) => this.dropZoneDisplay = dropZoneDisplay}
                      style={{paddingTop: topMargin, paddingBottom: bottomMargin}}>
-                    <div className="task_2_panel">
+                    <div className={"task_2_panel "+(this.props.taskData.status == "complete" ? "complete" : "")}>
                         <div className="task_2_header"
                              onMouseDown={this.addMoveAble.bind(this)}
                              onMouseUp={this.removeMoveAble.bind(this)}

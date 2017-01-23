@@ -53,7 +53,7 @@ socket.on('project:list',function(data,rs){
 	});
 });
 socket.on('project:getTaskCount',function(data,rs){
-	var query = "MATCH (t:Tasks)-->(p:Projects) WHERE id(p) = 2 WITH  " +
+	var query = "MATCH (t:Tasks)-->(p:Projects) WHERE id(p) = "+data.pid+" WITH  " +
 		"CASE WHEN t.parent_status IS NULL THEN t.status  " +
 			"ELSE t.parent_status END as status " +
 		"RETURN status , count(status) as count";

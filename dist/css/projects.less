@@ -191,7 +191,6 @@
 }
 .task_2_cover {
 	.task_level2 {
-		position:relative;
 		transition: padding 0.3s;
 		padding: 0px 0;
 		.task_2_panel {
@@ -199,6 +198,7 @@
 			border-radius: 5px 5px 5px 5px;
 			width: 290px;
 			overflow: hidden;
+			position: relative;
 			.task_2_header {
 				padding: 0px 10px;
 				line-height: 30px;
@@ -250,12 +250,17 @@
 				clear: both;
 			}
 		}
+		.complete {
+			background-image:url("../images/complete.png");
+			background-position: bottom right;
+			background-repeat: no-repeat;
+		}
 		.child_task {
 			margin-right: 9px;
 			cursor: pointer;
 			color: #827f82;
 			position: absolute;
-			bottom: 7px;
+			bottom: 2px;
 			right: 2px;
 			i {
 				margin-right: 2px;
@@ -330,7 +335,7 @@
 			cursor: pointer;
 			color: #827f82;
 			position: absolute;
-			bottom: 7px;
+			bottom: 2px;
 			right: 2px;
 			i {
 				margin-right: 2px;
