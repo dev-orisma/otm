@@ -492,8 +492,15 @@ class NavigatorElement extends Component {
     }
     render() {
         return (
-            <div className={this.props.data.id == this.props.currentIndex ? "deactive" : "active"}
-                onClick={this.calculateIndex.bind(this,this.props.data.id)}>{this.props.data.title}</div>
+            <div className="level_link">
+                <div className={this.props.data.id == this.props.currentIndex ? "deactive" : "active"}
+                    onClick={this.calculateIndex.bind(this,this.props.data.id)}>
+                    {this.props.data.title}
+                </div>
+                <div className="arrow">
+                    {this.props.data.id == this.props.currentIndex ? "" : ">"}
+                </div>
+            </div>
         );
     }
 }
@@ -794,7 +801,11 @@ class TaskLevel1 extends Component {
             clearTimeout(this.state.displayTimeout);
         }
     }
-
+    dateFormat(date_long) {
+        var month_array=["Jan","Feb","Mar","Apr","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        var date = new Date(parseFloat(date_long));
+        return date.getDate()+" "+month_array[date.getMonth()]+" "+date.getFullYear();
+    }
     render() {
         var leftMargin = "0px";
         var rightMargin = "0px";
@@ -825,17 +836,51 @@ class TaskLevel1 extends Component {
                                  onMouseUp={this.removeMoveAble.bind(this)} ref={(cardHeader) => {
                                 this.cardHeader = cardHeader
                             }}>
-                                {this.props.taskData[this.props.taskId].header}
-                                    <div className="expand_icon">
-                                        {typeof(this.props.taskChild) != "undefined" && this.props.taskChild.length > 0 ?
-                                            <i className="material-icons" onClick={this.props.switchTaskIndex.bind(this,this.props.taskId)}>toc</i>
-                                            : ""}
-                                        <i className="material-icons" onClick={this.props.openTaskDetail.bind(this,this.props.taskId)}>settings</i>
-                                    </div>
+                                <div className="header_text">
+                                    {this.props.taskData[this.props.taskId].header}
+                                </div>
+                                <div className="expand_icon">
+                                    {typeof(this.props.taskChild) != "undefined" && this.props.taskChild.length > 0 ?
+                                        <i className="material-icons" onClick={this.props.switchTaskIndex.bind(this,this.props.taskId)}>toc</i>
+                                        : ""}
+                                    <i className="material-icons" onClick={this.props.openTaskDetail.bind(this,this.props.taskId)}>settings</i>
+                                </div>
 
                             </div>
                             <div className="task_child">
                                 <Scrollbars className="scrollTaskList">
+                                    {this.props.parent != "root" ?
+                                        <div className="task_detail">
+                                            {this.props.taskData[this.props.taskId].a_id != 0 || (typeof(this.props.taskData[this.props.taskId].detail) != "undefined" && this.props.taskData[this.props.taskId].detail != null && this.props.taskData[this.props.taskId].detail.length > 0) ?
+                                                <div className="task_2_detail">
+                                                    {this.props.taskData[this.props.taskId].a_id != 0 ?
+                                                        <div className="avatar">
+                                                            <Avatar name={this.props.taskData[this.props.taskId].a_name}
+                                                                    avatar={this.props.taskData[this.props.taskId].a_avatar}
+                                                                    color={this.props.taskData[this.props.taskId].a_color}/>
+                                                        </div>
+                                                        :null}
+                                                    {this.props.taskData[this.props.taskId].detail}
+                                                </div>
+                                                :null}
+                                            <div className="due_date">
+                                                {this.dateFormat(this.props.taskData[this.props.taskId].endDate)}
+                                            </div>
+                                            {typeof(this.props.taskData[this.props.taskId].tag) != "undefined" && this.props.taskData[this.props.taskId].tag.length > 0 ?
+                                                <div className="task_label">
+                                                    {this.props.taskData[this.props.taskId].tag.map((tag, i)=>
+                                                        <div key={"color-" + i} className={"tagColor " + tag.properties.color} style={{
+                                                            backgroundColor: tag.properties.bg_color,
+                                                            color: tag.properties.f_color
+                                                        }}>{tag.properties.text}</div>
+                                                    )}
+                                                    <div className="clear_fix"></div>
+                                                    <div className="bottom_space"></div>
+                                                </div> : null
+                                            }
+                                        </div>
+                                        :null
+                                    }
                                     {typeof(this.props.taskChild) == "object" ? this.props.taskChild.map((taskId, index) =>
                                         <TaskLevel2 key={index}
                                                     taskId={taskId}
@@ -1058,6 +1103,7 @@ class TaskLevel2 extends Component {
                                 {this.props.taskData.header}
                             </div>
                         </div>
+                        {this.props.taskData.a_id != 0 || (typeof(this.props.taskData.detail) != "undefined" && this.props.taskData.detail != null && this.props.taskData.detail.length > 0) ?
                         <div className="task_2_detail">
                             {this.props.taskData.a_id != 0 ?
                                 <div className="avatar">
@@ -1065,9 +1111,10 @@ class TaskLevel2 extends Component {
                                             avatar={this.props.taskData.a_avatar}
                                             color={this.props.taskData.a_color}/>
                                 </div>
-                            :null}
+                                :null}
                             {this.props.taskData.detail}
                         </div>
+                            :null}
                         <div className="due_date">
                             {this.dateFormat(this.props.taskData.endDate)}
                         </div>
@@ -1080,6 +1127,7 @@ class TaskLevel2 extends Component {
                                     }}>{tag.properties.text}</div>
                                 )}
                                 <div className="clear_fix"></div>
+                                <div className="bottom_space"></div>
                             </div> : null
                         }
                         {this.props.taskData.child_count > 0 ?
@@ -1088,7 +1136,6 @@ class TaskLevel2 extends Component {
                             {this.props.taskData.child_count}
                         </div>
                             :null}
-                        <div className="bottom_space"></div>
                     </div>
                 </div>
             </div>

@@ -5,36 +5,43 @@ module.exports = function (socket,db) {
 		var query = "MATCH (t:Tasks)-[:PARENT]->" +
 		(input_parent == "root" ? "(pt:Projects) WHERE ID(pt) = "+pid+" "
 			:"(pt:Tasks) WHERE ID(pt) = "+parent+" " ) +
-		"AND t.status<>'archive' " +
-		"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
-		"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
-		"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
-		"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
-		"OPTIONAL MATCH (l:Labels)-[:IN]->(tc) " +
-		"OPTIONAL MATCH (tc)<-[:Assigned]-(tcu:Users)" +
-		"WITH t,tc,tcu,nt,pt,ntc,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as c_tag " +
-		"RETURN " +
-		"ID(t) as t_id," +
-		"t.title as header," +
-		"t.startDate as startDate," +
-		"t.endDate as endDate," +
-		"t.detail as detail," +
-		"COUNT(tc) as child_count," +
-		"ID(nt) as next," +
-		(input_parent == "root" ? "'root' as parent," : "ID(pt) as parent,")+
-		"COLLECT({t_id:ID(tc)," +
-			"a_id:ID(tcu)," +
-			"a_name:tcu.Name," +
-			"a_avatar:tcu.Avatar," +
-			"a_color:tcu.Color," +
-			"header:tc.title," +
-			"startDate:tc.startDate," +
-			"endDate:tc.endDate," +
-			"detail:tc.detail," +
-			"next:ID(ntc)," +
-			"tag:c_tag," +
-			"child_count:child_count}" +
-		") as childData";
+			"AND t.status<>'archive' " +
+			"OPTIONAL MATCH (t)-[:NEXT]->(nt:Tasks) " +
+			"OPTIONAL MATCH (t)<-[:Assigned]-(tu:Users)" +
+			"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
+			"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
+			"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
+			"OPTIONAL MATCH (cl:Labels)-[:IN]->(tc) " +
+			"OPTIONAL MATCH (l:Labels)-[:IN]->(t) " +
+			"OPTIONAL MATCH (tc)<-[:Assigned]-(tcu:Users)" +
+			"WITH t,tu,tc,tcu,nt,pt,ntc,COUNT(DISTINCT stc) as child_count,COLLECT(DISTINCT l) as tag,COLLECT(DISTINCT cl) as c_tag " +
+			"RETURN " +
+			"ID(t) as t_id," +
+			"ID(tu) as a_id," +
+			"tu.Name as a_name," +
+			"tu.Avatar as a_avatar," +
+			"tu.Color as a_color," +
+			"t.title as header," +
+			"t.startDate as startDate," +
+			"t.endDate as endDate," +
+			"t.detail as detail," +
+			"COUNT(tc) as child_count," +
+			"ID(nt) as next," +
+			"tag as tag," +
+			(input_parent == "root" ? "'root' as parent," : "ID(pt) as parent,")+
+			"COLLECT({t_id:ID(tc)," +
+				"a_id:ID(tcu)," +
+				"a_name:tcu.Name," +
+				"a_avatar:tcu.Avatar," +
+				"a_color:tcu.Color," +
+				"header:tc.title," +
+				"startDate:tc.startDate," +
+				"endDate:tc.endDate," +
+				"detail:tc.detail," +
+				"next:ID(ntc)," +
+				"tag:c_tag," +
+				"child_count:child_count}" +
+			") as childData";
 		return query;
 	}
 	function listUpdateTask(data,cb){

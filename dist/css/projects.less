@@ -34,21 +34,37 @@
 		line-height: 30px;
 		padding-left: 10px;
 		background: #444;
-		.active {
+		.level_link {
 			display: inline-block;
-			cursor: pointer;
-		}
-		.active::after {
-			content: ">";
-			color: #FFF;
-			margin: 0 10px;
-			display: inline-block;
-			cursor: default;
-		}
-		.deactive {
-			display: inline-block;
-			color: #BBB;
-			cursor: not-allowed;
+			heighT: 30px;
+			.active {
+				display: inline-block;
+				cursor: pointer;
+				max-width: 200px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				vertical-align: top;
+				line-height: 30px;
+			}
+			.deactive {
+				display: inline-block;
+				color: #BBB;
+				cursor: not-allowed;
+				max-width: 200px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				vertical-align: top;
+				line-height: 30px;
+			}
+			.arrow {
+				display: inline-block;
+				color: #FFF;
+				vertical-align: top;
+				line-height: 30px;
+				margin: 0 5px;
+			}
 		}
 	}
 	.task_panel {
@@ -86,6 +102,13 @@
 										color:#FFF;
 										border-radius: 10px 10px 0px 0px;
 										position: relative;
+										.header_text {
+											width: 250px;
+											text-overflow: ellipsis;
+											white-space: nowrap;
+											overflow: hidden;
+											text-overflow: ellipsis;
+										}
 										.addTaskLv1Input {
 											height: 25px;
 											margin-bottom: 0px;
@@ -113,6 +136,27 @@
 										.scrollTaskList {
 											width:inherit !important;
 											height: calc(~"100vh - 194px") !important;
+											.task_detail {
+												background: #bbb;
+												padding: 10px;
+												margin: 5px 0px;
+												border-radius: 5px;
+												.task_2_detail {
+													.avatar {
+														float: left;
+														display: block;
+														margin: 0px 10px 5px 0px;
+													}
+												}
+												.due_date {
+													color: #be5e2e;
+												}
+												.task_label {
+													.bottom_space{
+														clear: both;
+													}
+												}
+											}
 										}
 									}
 								}
@@ -191,6 +235,7 @@
 				float: left;
 				vertical-align: bottom;
 				line-height: 33px;
+				clear: both;
 			}
 			.task_label {
 				position:relative;
@@ -201,7 +246,6 @@
 			}
 			.bottom_space {
 				display: block;
-				height: 10px;
 				width: 100%;
 				clear: both;
 			}
@@ -277,7 +321,6 @@
 			}
 			.bottom_space {
 				display: block;
-				height: 10px;
 				width: 100%;
 				clear: both;
 			}
