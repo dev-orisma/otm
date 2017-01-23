@@ -183,7 +183,6 @@
   color: #FFF;
 }
 .task_2_cover .task_level2 {
-  position: relative;
   transition: padding 0.3s;
   padding: 0px 0;
 }
@@ -192,6 +191,7 @@
   border-radius: 5px 5px 5px 5px;
   width: 290px;
   overflow: hidden;
+  position: relative;
 }
 .task_2_cover .task_level2 .task_2_panel .task_2_header {
   padding: 0px 10px;
@@ -243,12 +243,17 @@
   width: 100%;
   clear: both;
 }
+.task_2_cover .task_level2 .complete {
+  background-image: url("../images/complete.png");
+  background-position: bottom right;
+  background-repeat: no-repeat;
+}
 .task_2_cover .task_level2 .child_task {
   margin-right: 9px;
   cursor: pointer;
   color: #827f82;
   position: absolute;
-  bottom: 7px;
+  bottom: 2px;
   right: 2px;
 }
 .task_2_cover .task_level2 .child_task i {
@@ -321,7 +326,7 @@
   cursor: pointer;
   color: #827f82;
   position: absolute;
-  bottom: 7px;
+  bottom: 2px;
   right: 2px;
 }
 .move_able .task_level2 .child_task i {
