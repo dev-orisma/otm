@@ -105,6 +105,9 @@ socket.on('tag:assign',function(data,rs){
 			rs(false)
 		}else{
 			rs(result_labels)
+			socket.broadcast.emit('project:notic_update', {
+				change:true
+			});
 		}
 	})
 

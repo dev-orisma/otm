@@ -49,7 +49,7 @@ module.exports = function (socket,db) {
 		var only_active_project = "(p.status = 'active')";
 		where_all.push(only_active_project);
 		//console.log(data);
-		var project_query = "-[:IN]-(c:Cards)-[:Child]-(p:Projects)";
+		var project_query = "-[:LIVE_IN]-(p:Projects)";
 		if (data.filter.project.length > 0) {
 			var project_where = [];
 			for (var i in data.filter.project) {
@@ -58,9 +58,8 @@ module.exports = function (socket,db) {
 			var project_where_str = "("+project_where.join(" OR ")+")";
 			where_all.push(project_where_str);
 		}
-		var user_query = "";
+		var user_query = "(u:Users)-[a:Assigned]-";
 		if (data.filter.user.length > 0) {
-			user_query = "(u:Users)-[a:Assigned]-";
 			var user_where = [];
 			for (var i in data.filter.user) {
 				user_where.push("ID(u) = "+data.filter.user[i]);
@@ -78,14 +77,22 @@ module.exports = function (socket,db) {
 			var tags_where_str = "("+tags_where.join(" OR ")+")";
 			where_all.push(tags_where_str);
 		}
-		var status_array = Array("active","archive","complete","trash");
+		var with_where_status = "";
+		var status_array = Array("active","archive","complete");
 		if (data.filter.status.length > 0) {
 			var status_where = [];
+			var with_where = [];
 			for (var i in data.filter.status) {
 				status_where.push("t.status = '"+status_array[data.filter.status[i]]+"'");
+				status_where.push("t.parent_status = '"+status_array[data.filter.status[i]]+"'");
+				with_where.push("status = '"+status_array[data.filter.status[i]]+"'");
 			}
 			var status_where_str = "("+status_where.join(" OR ")+")";
+			var with_where_str = "("+with_where.join(" OR ")+")";
 			where_all.push(status_where_str);
+			with_where_status = "," +
+				"CASE WHEN t.parent_status IS NULL THEN t.status " +
+				"ELSE t.parent_status END as status WHERE "+with_where_str;
 		}
 		var keyword_operator = "";
 		if (data.filter.operator.keyword == "&") {
@@ -109,9 +116,20 @@ module.exports = function (socket,db) {
 		}
 		var query = "MATCH "+user_query+"(t:Tasks)"+project_query+tag_query+where_all_str+
 			" OPTIONAL MATCH (lb:Labels)-[:IN]->(t) " +
-			"WITH t,COUNT(lb) as tags_count,lb as tags " +
-			"RETURN ID(t) as id,t.title as title,t.startDate as start_date,t.endDate as end_date,COLLECT(tags) as tags,count(ID(t)) AS count SKIP 0 LIMIT 30";
-		console.log(query);
+			"WITH t,u,COUNT(lb) as tags_count,lb as tags " + with_where_status +
+			"RETURN ID(t) as id," +
+			"t.title as title," +
+			"t.startDate as start_date," +
+			"t.endDate as end_date," +
+			"ID(u) as a_id," +
+			"u.Name as name," +
+			"u.Avatar as avatar," +
+			"u.Color as color," +
+			"status," +
+			"COLLECT(tags) as tags," +
+			"count(ID(t)) AS count " +
+			"SKIP 0 LIMIT 30";
+		console.log("========Filter=========\n"+query+"\n==================\n");
 		db.cypher({
 			query:query,
 		},function(err,results){
