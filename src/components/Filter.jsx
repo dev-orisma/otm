@@ -67,7 +67,7 @@ class Filter extends Component {
             }
         })
         var task_status_data = [];
-        var status_array = Array("Active","Archive","Complete","Trash");
+        var status_array = Array("Active","Archive","Complete");
         for (var i in status_array) {
             var task_status = {status:status_array[i],id:i,selected:false}
             task_status_data[i] = task_status;
@@ -120,13 +120,14 @@ class Filter extends Component {
                     return Materialize.toast("Error Not Found Project Data.", 4000)
                 }else{
                     var date_data_list = [];
+                    var month_array=["Jan","Feb","Mar","Apr","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
                     for (var i in rs) {
                         var data = rs[i];
                         var tempList = [];
                         var tempDate = [];
                         var date_data = new Date(parseInt(data.start_date));
                         var dateIndex = date_data.getMonth()+"-"+date_data.getFullYear();
-                        var dateString= date_data.getMonth()+" "+date_data.getFullYear();
+                        var dateString= month_array[date_data.getMonth()]+" "+date_data.getFullYear();
                         if (typeof(date_data_list[dateIndex]) != "undefined") {
                             tempList = date_data_list[dateIndex].data;
                             tempDate = date_data_list[dateIndex].date_str;
@@ -364,71 +365,81 @@ class FilterPanel extends Component {
     render() {
         return (
             <div className="filter_panel">
-            <div className='filter_head'>Filter</div>
-            <div className='filter_option'>
-            <div className='task_detail'>
-            <div className='filter_header'>
-            Project
-            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.project)} onClick={this.props.toggleShowFilter.bind(this,"project")}></div>
+                <div className='filter_head'>Filter</div>
+                <div className='filter_option'>
+                    <div className='task_detail'>
+                        <div className='filter_header'>
+                            Project
+                            <div className={'sign right1 arrow ' + this.arrowDisplay(this.props.filter_display.project)}
+                                 onClick={this.props.toggleShowFilter.bind(this, "project")}></div>
+                        </div>
+                        <div className='filter'>
+                            <div
+                                className={"filter_project " + this.convertShowStatus(this.props.filter_display.project)}>
+                                {this.props.project.map((project) =>
+                                    <ProjectDisplay key={project.id} data={project}
+                                                    projectToggle={this.props.projectToggle}/>
+                                )}
+                            </div>
+                        </div>
+                        <div className='filter_header'>
+                            Keyword
+                            <div className='sign right1'
+                                 onClick={this.props.toggleOperation.bind(this, "keyword")}>{this.props.operation.keyword}</div>
+                        </div>
+                        <div className='filter'>
+                            <div className='filter_keyword'>
+                                <input type='text' className='input_keyword' onChange={this.getKeyword}
+                                       value={this.state.keyword} onKeyPress={this.inputKeypress}/>
+                                <i className="material-icons" onClick={this.addKeyword}>add_box</i>
+                            </div>
+                            <div className='keyword_list'>
+                                {this.props.keyword.map((keyword, index) =>
+                                    <KeywordList key={index} keyword={keyword} index={index}
+                                                 removeKeyword={this.props.removeKeyword}/>
+                                )}
+                            </div>
+                        </div>
+                        <div className='filter_header'>
+                            Assigned To
+                            <div className={'sign right1 arrow ' + this.arrowDisplay(this.props.filter_display.assign)}
+                                 onClick={this.props.toggleShowFilter.bind(this, "assign")}></div>
+                        </div>
+                        <div className='filter'>
+                            <div
+                                className={"filter_assign " + this.convertShowStatus(this.props.filter_display.assign)}>
+                                {this.props.users.map((users) =>
+                                    <UserList key={users.id} data={users} userToggle={this.props.userToggle}/>
+                                )}
+                            </div>
+                        </div>
+                        <div className='filter_header'>
+                            Tags
+                            <div className={'sign right1 arrow ' + this.arrowDisplay(this.props.filter_display.tags)}
+                                 onClick={this.props.toggleShowFilter.bind(this, "tag")}></div>
+                        </div>
+                        <div className='filter'>
+                            <div className={"filter_tag " + this.convertShowStatus(this.props.filter_display.tags)}>
+                                {this.props.tags.map((tag) =>
+                                    <TagsList key={tag.id} data={tag} tagToggle={this.props.tagToggle}/>
+                                )}
+                            </div>
+                        </div>
+                        <div className='filter_header'>
+                            Status
+                        </div>
+                        <div className='filter'>
+                            <div className='filter_status'>
+                                {this.props.task_status.map((status) =>
+                                    <StatusList key={status.id} data={status}
+                                                statusToggle={this.props.taskStatusToggle}/>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div className='filter'>
-            <div className={"filter_project "+this.convertShowStatus(this.props.filter_display.project)}>
-            {this.props.project.map((project) =>
-                <ProjectDisplay key={project.id} data={project} projectToggle={this.props.projectToggle}/>
-                )}
-            </div>
-            </div>
-            <div className='filter_header'>
-            Keyword
-            <div className='sign right1' onClick={this.props.toggleOperation.bind(this,"keyword")}>{this.props.operation.keyword}</div>
-            </div>
-            <div className='filter'>
-            <div className='filter_keyword'>
-            <input type='text' className='input_keyword' onChange={this.getKeyword} value={this.state.keyword} onKeyPress={this.inputKeypress} />
-            <i className="material-icons" onClick={this.addKeyword}>add_box</i>
-            </div>
-            <div className='keyword_list'>
-            {this.props.keyword.map((keyword,index) =>
-                <KeywordList key={index} keyword={keyword} index={index} removeKeyword={this.props.removeKeyword}/>
-                )}
-            </div>
-            </div>
-            <div className='filter_header'>
-            Assigned To
-            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.assign)} onClick={this.props.toggleShowFilter.bind(this,"assign")}></div>
-            </div>
-            <div className='filter'>
-            <div className={"filter_assign "+this.convertShowStatus(this.props.filter_display.assign)}>
-            {this.props.users.map((users) =>
-                <UserList key={users.id} data={users} userToggle={this.props.userToggle}/>
-                )}
-            </div>
-            </div>
-            <div className='filter_header'>
-            Tags
-            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.tags)} onClick={this.props.toggleShowFilter.bind(this,"tag")}></div>
-            </div>
-            <div className='filter'>
-            <div className={"filter_tag "+this.convertShowStatus(this.props.filter_display.tags)}>
-            {this.props.tags.map((tag) =>
-                <TagsList key={tag.id} data={tag} tagToggle={this.props.tagToggle} />
-                )}
-            </div>
-            </div>
-            <div className='filter_header'>
-            Status
-            </div>
-            <div className='filter'>
-            <div className='filter_status'>
-            {this.props.task_status.map((status) =>
-                <StatusList key={status.id} data={status} statusToggle={this.props.taskStatusToggle} />
-                )}
-            </div>
-            </div>
-            </div>
-            </div>
-            </div>
-            )
+        )
     }
 }
 class StatusList extends Component {
@@ -517,19 +528,49 @@ class TagsListInTask extends Component {
     }
 }
 class TaskListInDate extends Component {
+
+    dateFormat(date_long) {
+        var month_array=["Jan","Feb","Mar","Apr","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        var date = new Date(parseFloat(date_long));
+        return date.getDate()+" "+month_array[date.getMonth()]+" "+date.getFullYear();
+    }
     render() {
+        var status_array = [];
+        status_array["complete"] = "Complete";
+        status_array["active"] = "Active";
+        status_array["archive"] = "Archive";
         return (
             <div className="task_in_date_list">
-            <div className='task_detail' onClick={this.props.viewTaskDetail.bind(this,this.props.data.id)}>
-            <div className='task_name'>
-            {this.props.data.title}
-            </div>
-            <div className='tag_panel'>
-            {this.props.data.tags.map((tag,index) =>
-                <TagsListInTask key={index} data={tag} />
-                )}
-            </div>
-            </div>
+                <div className='task_detail' onClick={this.props.viewTaskDetail.bind(this, this.props.data.id)}>
+                    {this.props.data.a_id != 0 ?<div className="avatar_panel">
+                        <Avatar name={this.props.data.name}
+                                avatar={this.props.data.avatar}
+                                color={this.props.data.color}/>
+                    </div>: ""}
+                    <div className='task_name'>
+                        {this.props.data.title}
+                    </div>
+                    <div className="date">
+                        Date:
+                    </div>
+                    <div className="start_date">
+                        {this.dateFormat(this.props.data.start_date)}
+                    </div>
+                    <div className="to">
+                        To
+                    </div>
+                    <div className="end_date">
+                        {this.dateFormat(this.props.data.end_date)}
+                    </div>
+                    <div className={this.props.data.status}>
+                        {status_array[this.props.data.status]}
+                    </div>
+                    <div className='tag_panel'>
+                        {this.props.data.tags.map((tag, index) =>
+                            <TagsListInTask key={index} data={tag}/>
+                        )}
+                    </div>
+                </div>
             </div>
             )
     }

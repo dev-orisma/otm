@@ -10,7 +10,7 @@ module.exports = function (socket,db) {
 			"OPTIONAL MATCH (t)<-[:Assigned]-(tu:Users)" +
 			"OPTIONAL MATCH (tc:Tasks)-[:PARENT]->(t) WHERE tc.status<>'archive' " +
 			"OPTIONAL MATCH (tc)-[:NEXT]->(ntc:Tasks) " +
-			"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) " +
+			"OPTIONAL MATCH (stc:Tasks)-[:PARENT]->(tc) WHERE stc.status<>'archive' " +
 			"OPTIONAL MATCH (cl:Labels)-[:IN]->(tc) " +
 			"OPTIONAL MATCH (l:Labels)-[:IN]->(t) " +
 			"OPTIONAL MATCH (tc)<-[:Assigned]-(tcu:Users)" +
@@ -39,7 +39,7 @@ module.exports = function (socket,db) {
 				"startDate:tc.startDate," +
 				"endDate:tc.endDate," +
 				"detail:tc.detail," +
-			"status:tc.status," +
+				"status:tc.status," +
 				"next:ID(ntc)," +
 				"tag:c_tag," +
 				"child_count:child_count}" +
@@ -158,6 +158,9 @@ module.exports = function (socket,db) {
 						console.log(err);
 					} else {
 						rs(results);
+						socket.broadcast.emit('project:notic_update', {
+							change:true
+						});
 					}
 				});
 			}
@@ -234,6 +237,9 @@ module.exports = function (socket,db) {
 					console.log(err);
 				} else {
 					rs(results);
+					socket.broadcast.emit('project:notic_update', {
+						change:true
+					});
 				}
 			});
 		}
@@ -414,9 +420,8 @@ module.exports = function (socket,db) {
 							title:item['u.Name']
 						});
 					});
-					socket.broadcast.emit('task:updateEndTime', {
-						pid:data.pid,
-						list:boardList
+					socket.broadcast.emit('project:notic_update', {
+						change:true
 					});
 				}
 			});
@@ -499,6 +504,9 @@ module.exports = function (socket,db) {
 				rs(false)
 			}else{
 				rs(results)
+				socket.broadcast.emit('project:notic_update', {
+					change:true
+				});
 			}
 		})
 	});
@@ -511,6 +519,9 @@ module.exports = function (socket,db) {
 				rs(false)
 			}else{
 				rs(results)
+				socket.broadcast.emit('project:notic_update', {
+					change:true
+				});
 			}
 		})
 	});
@@ -523,6 +534,9 @@ module.exports = function (socket,db) {
 				rs(false)
 			}else{
 				rs(results)
+				socket.broadcast.emit('project:notic_update', {
+					change:true
+				});
 			}
 		})
 	});
@@ -548,6 +562,9 @@ module.exports = function (socket,db) {
 					});
 				}
 				rs(results)
+				socket.broadcast.emit('project:notic_update', {
+					change:true
+				});
 			}
 		})
 	});
@@ -587,6 +604,9 @@ module.exports = function (socket,db) {
 				rs(false)
 			} else {
 				rs(results)
+				socket.broadcast.emit('project:notic_update', {
+					change:true
+				});
 			}
 		})
 	});
@@ -648,6 +668,9 @@ module.exports = function (socket,db) {
 					});
 				}
 				rs(results)
+				socket.broadcast.emit('project:notic_update', {
+					change:true
+				});
 			}
 		})
 	});

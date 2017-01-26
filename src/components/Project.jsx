@@ -122,6 +122,9 @@ class Project extends Component {
             taskDetail: [],
             navigator: [],
             tempDragZoneAction: null,
+            scrollStatus: "stop",
+            preventLoop: 0,
+            preventLoopTimeout: null,
         }
     };
     closeTaskDetail() {
@@ -144,7 +147,21 @@ class Project extends Component {
         //console.log(parent,taskId,status);
         this.state.taskData[taskId].preview = status;
         this.state.dragTo = {parent: parent, taskId: taskId, position: status};
-        this.setState({taskChild: this.state.taskChild});
+
+        if (this.state.preventLoop < 20) {
+            this.setState({taskChild: this.state.taskChild});
+            this.state.preventLoop++;
+        } else {
+            console.log("prevent loop");
+            clearTimeout(this.state.preventLoopTimeout);
+            this.state.preventLoopTimeout = setTimeout(()=>{
+                this.state.preventLoop = 0;
+            },2000);
+        }
+        /*        this.setState((preventState,props) => {
+         console.log(preventState.taskChild);
+         return {taskChild: preventState.taskChild};
+         });*/
     }
     calculateAddTask(parent, data) {
         var ref_parent;
@@ -210,7 +227,6 @@ class Project extends Component {
         var nav_data = new Array();
         for (var i in parent_data) {
             var np_data = {id:"id-"+parent_data[i].t_id,title:parent_data[i].title}
-            console.log(np_data);
             nav_data.splice(0,0,np_data);
         }
         nav_data.splice(0,0,root_data);
@@ -381,13 +397,13 @@ class Project extends Component {
     componentDidMount() {
         this.loadProjectData();
         this.updateTaskCount();
+        this.props.socket.on('project:notic_update', this.loadTaskData.bind(this));
     }
     updateTaskCount() {
         projects.getCount(this.props.socket, this.state.projectId, (rs) => {
             if (!rs) {
                 return Materialize.toast("Error", 4000)
             } else {
-                console.log(rs);
                 this.setState({taskCount:rs});
             }
         });
@@ -412,35 +428,54 @@ class Project extends Component {
             }
         });
     }
+    updateScrollStatus(status) {
+        this.state.scrollStatus = status;
+    }
     dragComponent(x, y) {
         if (this.state.moveState == true) {
             this.updateDragZone({x: x, y: y});
         }
     }
     updateDragZone(dragZone) {
-        if (dragZone == null) {
-            this.state.checkDrop = null;
-            for (var i in this.state.taskData) {
-                if (this.state.taskData[i].preview != "none") {
-                    this.state.checkDrop = "move";
+        if (this.state.scrollStatus == "stop") {
+            if (dragZone == null) {
+                this.state.checkDrop = null;
+                for (var i in this.state.taskData) {
+                    if (this.state.taskData[i].preview != "none") {
+                        this.state.checkDrop = "move";
+                    }
+                    this.state.taskData[i].preview = "none";
                 }
-                this.state.taskData[i].preview = "none";
+                this.setState({dragZone: dragZone});
             }
-            this.setState({dragZone: dragZone});
+            if (typeof(window.getSelection) != "undefined") {
+                window.getSelection().removeAllRanges();
+            } else if (typeof(document.selection) != "undefined") {
+                document.selection.empty();
+            }
+            this.setState({mouseMoveZone: dragZone});
+            if (this.state.tempDragZoneAction != null) {
+                clearTimeout(this.state.tempDragZoneAction);
+                this.state.tempDragZoneAction = null;
+            }
+            this.setState((preventState,props) => {
+                console.log(preventState.dragZone);
+                return {dragZone: dragZone};
+            });
+            this.state.tempDragZoneAction = setTimeout(() => {
+
+/*                if (this.state.preventLoop < 50) {
+                    this.setState({dragZone: dragZone});
+                    this.state.preventLoop++;
+                } else {
+                    console.log("prevent loop");
+                    clearTimeout(this.state.preventLoopTimeout);
+                    this.state.preventLoopTimeout = setTimeout(()=>{
+                        this.state.preventLoop = 0;
+                    },2000);
+                }*/
+            },50);
         }
-        if (typeof(window.getSelection) != "undefined") {
-            window.getSelection().removeAllRanges();
-        } else if (typeof(document.selection) != "undefined") {
-            document.selection.empty();
-        }
-        this.setState({mouseMoveZone: dragZone});
-        if (this.state.tempDragZoneAction != null) {
-            clearTimeout(this.state.tempDragZoneAction);
-            this.state.tempDragZoneAction = null;
-        }
-        this.state.tempDragZoneAction = setTimeout(() => {
-            this.setState({dragZone: dragZone});
-        },50);
     }
     switchTaskIndex(data) {
         //console.log(data);
@@ -467,6 +502,7 @@ class Project extends Component {
                     movingElement={this.state.movingElement}
                     addTaskLv1={this.state.addTaskLv1}
                     addPreview={this.state.addPreview}
+                    scrollStatus={this.state.scrollStatus}
                     setScrollLeft={this.setScrollLeft.bind(this)}
                     dragComponent={this.dragComponent.bind(this)}
                     setDragFrom={this.setDragFrom.bind(this)}
@@ -476,7 +512,8 @@ class Project extends Component {
                     calculateAddTask={this.calculateAddTask.bind(this)}
                     showAddTask={this.showAddTask.bind(this)}
                     switchTaskIndex={this.switchTaskIndex.bind(this)}
-                    openTaskDetail={this.openTaskDetail.bind(this)}/>
+                    openTaskDetail={this.openTaskDetail.bind(this)}
+                    updateScrollStatus={this.updateScrollStatus.bind(this)}/>
                 {this.state.taskDetail.map((task_id,index) =>
                     <TaskDetail key={index} taskId={task_id} socket={this.props.socket} closeTask={this.closeTaskDetail.bind(this)}/>
                 )}
@@ -574,6 +611,7 @@ class TaskList extends Component {
                                             dragTo={this.props.dragTo}
                                             movingElement={this.props.movingElement}
                                             addPreview={this.props.addPreview}
+                                            scrollStatus={this.props.scrollStatus}
                                             setDragFrom={this.props.setDragFrom}
                                             updateDragZone={this.props.updateDragZone}
                                             dropElement={this.props.dropElement}
@@ -581,7 +619,8 @@ class TaskList extends Component {
                                             calculateAddTask={this.props.calculateAddTask}
                                             showAddTask={this.props.showAddTask}
                                             switchTaskIndex={this.props.switchTaskIndex}
-                                            openTaskDetail={this.props.openTaskDetail}/>
+                                            openTaskDetail={this.props.openTaskDetail}
+                                            updateScrollStatus={this.props.updateScrollStatus}/>
                             ) : null )}
                             {this.props.addPreview[this.props.parent] == true ?
                                 <AddTaskLv1
@@ -666,8 +705,6 @@ class AddTaskLv1 extends Component {
                                        onBlur={this.calculateNewTask.bind(this)} onKeyUp={this.newTaskKeyEvent.bind(this)}/>
                             </div>
                             <div className="task_child">
-                                <Scrollbars className="scrollTaskList">
-                                </Scrollbars>
                             </div>
                         </div>
                     </div>
@@ -818,6 +855,9 @@ class TaskLevel1 extends Component {
         var date = new Date(parseFloat(date_long));
         return date.getDate()+" "+month_array[date.getMonth()]+" "+date.getFullYear();
     }
+    updateScroll(status) {
+        this.props.updateScrollStatus(status);
+    }
     render() {
         var leftMargin = "0px";
         var rightMargin = "0px";
@@ -860,7 +900,8 @@ class TaskLevel1 extends Component {
 
                             </div>
                             <div className="task_child">
-                                <Scrollbars className="scrollTaskList">
+                                <Scrollbars onScrollStart={this.updateScroll.bind(this,"start")} onScrollStop={this.updateScroll.bind(this,"stop")}
+                                    className="scrollTaskList">
                                     {this.props.parent != "root" ?
                                         <div className="task_detail">
                                             {this.props.taskData[this.props.taskId].a_id != 0 || (typeof(this.props.taskData[this.props.taskId].detail) != "undefined" && this.props.taskData[this.props.taskId].detail != null && this.props.taskData[this.props.taskId].detail.length > 0) ?
@@ -890,6 +931,8 @@ class TaskLevel1 extends Component {
                                                     <div className="bottom_space"></div>
                                                 </div> : null
                                             }
+                                            <div className="clear_fix">
+                                            </div>
                                         </div>
                                         :null
                                     }
