@@ -38,7 +38,7 @@ module.exports = {
 			title:title,
 			after:after,
 			parent:parent,
-			load_index:load_index,
+			load_index:load_index
 		}, (result) => {
 			if(!result) {
 				cb(false)
@@ -349,5 +349,5 @@ module.exports = {
 				cb(result)
 			}
 		});
-	},
+	}
 }

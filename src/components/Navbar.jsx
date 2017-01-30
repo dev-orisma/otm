@@ -3,13 +3,11 @@ import {Link} from 'react-router';
 import auth from './Module/Auth';
 import Router from 'react-router/BrowserRouter'
 import Match from 'react-router/Match'
-//import Redirect from 'react-router/Redirect'
 import Miss from 'react-router/Miss'
 
 
 import Dashboard from './Dashboard'
 import Project from './Project'
-//import ProjectDemo from './ProjectDemoFlow'
 import Filter from './Filter'
 import Login from './Login'
 import Logout from './Logout'
@@ -98,8 +96,8 @@ class Navbar extends Component {
 				<div className="nav-wrapper header"><Link to="/" id="logo-container" className="brand-logo"><img src='/images/otm_logo_white.svg'/></Link>
 
 
-				{ auth.loggedIn() ?
-					<ul className="right hide-on-med-and-down">
+				{ auth.loggedIn()
+          ? <ul className="right hide-on-med-and-down">
 					<li><Link to="/timeline"><i className="large material-icons">clear_all</i></Link></li>
 					<li><Link to="/filter"><i className="large material-icons">search</i></Link></li>
 					<li className="relative">
@@ -110,8 +108,7 @@ class Navbar extends Component {
 					<li><Link to="/profile"><i className="large material-icons">perm_identity</i></Link></li>
 					<li><Link to="/logout"><i className="large material-icons">power_settings_new</i></Link></li>
 					</ul>
-					:
-					<ul className="right hide-on-med-and-down">
+					: <ul className="right hide-on-med-and-down">
 					<li><Link to="register">Register</Link></li>
 					<li><Link to="login">Login</Link></li>
 					</ul>
