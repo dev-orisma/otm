@@ -5,8 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "forever_start": "forever start server.js",
+    "start": "forever -o logs/out.log -e logs/err.log start server.js",
+    "stop": "npm run forever_stop",
+    "forever_start": "forever -e logs/err.log start server.js",
     "forever_stop": "forever stop server.js",
     "lint": "eslint --ext .js,.jsx src",
     "lintfix": "eslint --ext .js,.jsx src --fix",
@@ -53,7 +54,7 @@
     "sass-loader": "^3.2.0",
     "socket.io": "^1.5.1",
     "style-loader": "^0.13.1",
-    "webpack": "1.13.2"
+    "webpack": "1.13.2",
   },
   "devDependencies": {
     "eslint": "^2.7.0",
