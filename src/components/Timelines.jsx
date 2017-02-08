@@ -51,7 +51,8 @@ class Timelines extends Component {
 		CM.listTask(this.props.socket,item.d.id,(rs)=>{
 			if(!rs){
         console.error("listTask: " ,rs);
-			}else{
+      }else{
+        console.log("listTask: " ,rs);
 				var ac = [],uc = []
 				rs.forEach(function(v,i){
 					ac.push({

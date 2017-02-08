@@ -7,18 +7,6 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var socket = require('./socket');
 
-var winston = require('winston');
-console = new (winston.Logger)({
-    transports: [
-      new winston.transports.Console(),
-      new winston.transports.File({ filename: 'logs/all-logs.log' })
-    ],
-    exceptionHandlers: [
-      new winston.transports.File({ filename: 'logs/exceptions.log' })
-    ]
-  });
-
-
 // using webpack-dev-server and middleware in development environment
 if (process.env.NODE_ENV !== 'production') {
   var webpackDevMiddleware = require('webpack-dev-middleware');
