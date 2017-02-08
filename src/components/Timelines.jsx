@@ -131,7 +131,7 @@ class Timelines extends Component {
 				<div id="project-list">
 				<div id="btn-all-project">All Projects</div>
 				{ items.map((item, i) =>
-					<div className={this.activeProject(item.d.id)} onClick={this.selectProject.bind(this,item)} key={"list-project-"+i}><i className="material-icons tiny">library_books</i> {item.d.title}</div>
+					<div className={this.activeProject(item.d.id)} onClick={this.selectProject.bind(this,item)} key={"list-project-"+i}><i className="material-icons tiny">library_books</i> <Link to={"/project/"+item.d.id}>{item.d.title}</Link> </div>
 					)}
 				</div>
 
