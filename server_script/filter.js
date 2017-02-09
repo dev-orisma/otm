@@ -14,12 +14,14 @@ module.exports = function (socket,db) {
 	});
 
 	socket.on('filter:loadUser',function(data,rs){
+    var query =  "MATCH (ua:Users)-[:Create|:Assigned]-(p:Projects)-[:Create|:Assigned]-(u:Users) " +
+      "WHERE ID(u) = "+data.uid+" " +
+      "RETURN ua.Name as name,ID(ua) as id,ua.Avatar as avatar,ua.Color as color, count(ID(ua)) as count " +
+      "UNION MATCH (u:Users) WHERE ID(u) = "+data.uid+" " +
+      "RETURN u.Name as name,ID(u) as id,u.Avatar as avatar,u.Color as color, count(ID(u)) as count";
+      console.log("qeury: ", query);
 		db.cypher({
-			query:"MATCH (ua:Users)-[:Create|:Assigned]-(p:Projects)-[:Create|:Assigned]-(u:Users) " +
-			"WHERE ID(u) = "+data.uid+" " +
-			"RETURN ua.Name as name,ID(ua) as id,ua.Avatar as avatar,ua.Color as color, count(ID(ua)) as count " +
-			"UNION MATCH (u:Users) WHERE ID(u) = "+data.uid+" " +
-			"RETURN u.Name as name,ID(u) as id,u.Avatar as avatar,u.Color as color, count(ID(u)) as count",
+			query:query
 		},function(err,results){
 			if (err) console.log(err);
 			if(!results || err){
@@ -125,7 +127,7 @@ module.exports = function (socket,db) {
 			"u.Name as name," +
 			"u.Avatar as avatar," +
 			"u.Color as color," +
-			(data.filter.status.length ? "status," : "")+
+			(data.filter.status.length > 0 ? "status," :"") +
 			"COLLECT(tags) as tags," +
 			"count(ID(t)) AS count " +
 			"SKIP 0 LIMIT 30";

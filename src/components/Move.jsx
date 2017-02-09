@@ -3,7 +3,6 @@ import Dropdown from 'react-dropdown'
 import Project from './Module/Project'
 import MoveModule from './Module/Move'
 import Tasks from './Module/Task'
-import Loading from './Loading';
 
 import '../../dist/css/move.css';
 
@@ -29,7 +28,6 @@ class Move extends Component {
 	componentWillMount(){
 		var socket = this.state.socket;
 		var _this = this;
-		var cart_id = "";
 		Tasks.get(this.state.socket,"",this.state.taskId,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด ไม่พบ Task นี้", 4000)
@@ -150,8 +148,8 @@ class Move extends Component {
 		return (
 			<div id="move-panel">
 				<button onClick={this.popupShow.bind(this)} className="btn gray w100">Move</button>
-				{this.state.popupState?
-					<div id="move-panel-inner">
+				{this.state.popupState
+          ? <div id="move-panel-inner">
 						<div id="move-project-panel" className="list-panel">
 							<div className="list-panel-inner">
 								<label className="subject-title">Project:</label>

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Link from 'react-router/Link'
 import Common from './Module/Common'
 class Notification extends Component {
 	constructor(props) {
@@ -11,7 +10,7 @@ class Notification extends Component {
 		}
 	}
 	componentDidMount() {
-		
+
 		Common.listNotification(this.props.socket,this.state.offset,(rs)=>{
 			if(!rs){
 
@@ -21,10 +20,10 @@ class Notification extends Component {
 		})
 	}
 	componentWillMount() {
-		
+
 	}
 	loadmore(){
-		
+
 		var elmnt = document.getElementById("notify-body");
 		var height = elmnt.scrollHeight - elmnt.clientHeight;
 		var y = elmnt.scrollTop;
@@ -53,7 +52,7 @@ class Notification extends Component {
 				this.props.updateNotify()
 			}
 		})
-		
+
 	}
 	makeAllReaded(){
 		Common.readNotification(this.props.socket,(rs)=>{

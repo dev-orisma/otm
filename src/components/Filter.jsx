@@ -3,10 +3,6 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import FilterLoad from "./Module/Filter";
 import TaskDetail from './TaskDetail';
 import Avatar from './Avatar';
-import Tasks from './Module/Task'
-
-var _ = require('lodash')
-
 
 class Filter extends Component {
     constructor(props) {
@@ -67,7 +63,7 @@ class Filter extends Component {
             }
         })
         var task_status_data = [];
-        var status_array = Array("Active","Archive","Complete");
+        var status_array = ["Active","Archive","Complete"];
         for (var i in status_array) {
             var task_status = {status:status_array[i],id:i,selected:false}
             task_status_data[i] = task_status;
@@ -75,44 +71,44 @@ class Filter extends Component {
         this.setState({task_status:task_status_data});
     }
     updateFilter() {
-        var project_refined = [],keyword_refined = [],user_refined = [],tag_refined = [],status_refined = [];
+        var project_refined = [];
+        var keyword_refined = [];
+        var user_refined = [];
+        var tag_refined = [];
+        var status_refined = [];
         var needFilter = false;
         if (this.state.project[0].selected == false) {
-            for (var i in this.state.project) {
-                var data = this.state.project[i];
-                if (data.selected == true) {
-                    project_refined.push(data.id);
-                }
-            }
+            this.state.project.forEach(data => {
+              if (data.selected == true) {
+                  project_refined.push(data.id);
+              }
+            })
         }
-        for (var i in this.state.keyword) {
-            var data = this.state.keyword[i];
+
+        this.state.keyword.forEach(data => {
             if (data != null) {
                 keyword_refined.push(data);
                 needFilter = true;
             }
-        }
-        for (var i in this.state.users) {
-            var data = this.state.users[i];
+        })
+        this.state.users.forEach(data => {
             if (data.selected == true) {
                 user_refined.push(data.id);
                 needFilter = true;
             }
-        }
-        for (var i in this.state.tags) {
-            var data = this.state.tags[i];
+        })
+        this.state.tags.forEach(data =>{
             if (data.selected == true) {
                 tag_refined.push(data.id);
                 needFilter = true;
             }
-        }
-        for (var i in this.state.task_status) {
-            var data = this.state.task_status[i];
+        })
+        this.state.task_status.forEach(data => {
             if (data.selected == true) {
                 status_refined.push(data.id);
                 needFilter = true;
             }
-        }
+        })
         if (needFilter == true) {
             var filter = {project:project_refined,keyword:keyword_refined,user:user_refined,tags:tag_refined,status:status_refined,operator:this.state.operation}
             FilterLoad.loadFilter(this.props.socket,filter,(rs)=>{
@@ -128,7 +124,7 @@ class Filter extends Component {
                         var date_data = new Date(parseInt(data.start_date));
                         var dateIndex = date_data.getMonth()+"-"+date_data.getFullYear();
                         var dateString= month_array[date_data.getMonth()]+" "+date_data.getFullYear();
-                        if (typeof(date_data_list[dateIndex]) != "undefined") {
+                        if (typeof date_data_list[dateIndex] != "undefined") {
                             tempList = date_data_list[dateIndex].data;
                             tempDate = date_data_list[dateIndex].date_str;
                         } else {
@@ -139,15 +135,18 @@ class Filter extends Component {
                         date_data_list[dateIndex] = data_obj_list;
                     }
                     var task_list = [];
-                    for (var i in date_data_list) {
-                        task_list.push(date_data_list[i]);
+                    for (var j in date_data_list) {
+                        task_list.push(date_data_list[j]);
                     }
+                    console.log("task_list: ", task_list);
                     this.setState({taskList:task_list});
+
                 }
             })
         } else {
             var task_list = [];
             this.setState({taskList:task_list});
+
         }
 
     }
@@ -195,9 +194,9 @@ class Filter extends Component {
         } else {
             this.state.project[pid].selected = false;
             if (pid == 0) {
-                for (var i in this.state.project) {
-                    this.state.project[i].selected = false;
-                }
+              this.state.project.forEach(data => {
+                data.selected = false;
+              })
             } else {
                 this.state.project[0].selected = false;
             }
@@ -284,19 +283,6 @@ class Filter extends Component {
   }
 }
 
-/*class ProjectSelect extends Component {
-    render() {
-        if (this.props.selected) {
-            return (
-                <i className="material-icons project_select">check_box</i>
-            )
-        } else {
-            return (
-                <i className="material-icons project_select">check_box_outline_blank</i>
-            )
-        }
-    }
-}*/
 class ProjectDisplay extends Component {
     selectedData() {
         if (this.props.data.selected) {

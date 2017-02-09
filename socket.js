@@ -20,10 +20,6 @@ module.exports = function (socket) {
 	};
 	var db = new neo4j.GraphDatabase('http://'+config.neo4jUSER+':'+config.neo4jPASS+'@'+config.neo4jURL);
 
-	socket.emit('init', {
-		welcome:'Hello Orisma Team.'
-	});
-
 	filter(socket,db);
 	user(socket,db);
 	project(socket,db);

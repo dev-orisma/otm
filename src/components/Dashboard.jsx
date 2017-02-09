@@ -93,7 +93,7 @@ class Dashboard extends Component {
 				uid:data.id,
 				name:data.name,
 				avatar:data.avatar,
-				avatar:data.color
+				color:data.color
 			})
 			this.setState({editUsers})
 		}

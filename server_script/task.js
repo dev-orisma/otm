@@ -105,7 +105,6 @@ module.exports = function (socket,db) {
 		});
 	}
 	socket.on("task:addLv1",function(data,rs) {
-		console.log(data);
 		var parent_query = "";
 		var relation_parent = "";
 		var prev_query = "";
@@ -139,14 +138,25 @@ module.exports = function (socket,db) {
 			",(t)<-[:Assigned {date:'"+data.at_create+"'}]-(uz)" +
 			",(t)-[:CREATE_BY{date:"+new Date().getTime()+"}]->(u)"+
 			order_relation+
-			relation_parent;
-		db.cypher({
-			query:query
-		},function(err,results){
-			if (err) {
-				console.log(err);
-			}else{
-				var queryUpdateData = "";
+			relation_parent + " return t";
+
+    db.cypher({
+      query:query
+    },function(err,results){
+      if (err) {
+        console.error(err);
+      }else{
+
+        if(results.length < 1){
+            console.error( "empty nonMatch Data: rs["+(results.length)+"]" + query );
+            rs(false);
+            socket.broadcast.emit('project:notic_update', {
+              change:false
+            });
+            return ;
+        }
+
+        var queryUpdateData = "";
 				var load_index = data.load_index.split("-")[1];
 				queryUpdateData = getProjectDataQuery(data.load_index,data.pid);
 
@@ -369,7 +379,7 @@ module.exports = function (socket,db) {
 
 	socket.on('task:listByProject',function(data,rs){
 		db.cypher({
-			query:'MATCH (p:Projects)<-[l:LIVE_IN]-(c:Cards)<-[:IN]-(t:Tasks) WHERE ID(p) = '+data.pid+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u)',
+			query:'MATCH (p:Projects)<-[:PARENT]-(x:Tasks)<-[l:PARENT]-(t:Tasks) WHERE ID(p) = '+data.pid+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u)',
 		},function(err,results){
 			if (err) console.log(err);
 			var res = [];

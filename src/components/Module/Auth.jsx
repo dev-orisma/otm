@@ -117,7 +117,7 @@ function pretendSaveProfile(socket,uid,pass,name,avatar, cb) {
 function pretendSaveAvatar(socket,uid,file, cb) {
   socket.emit('user:saveAvatar', {
     uid:uid,
-    file:file,
+    file:file
   }, (result) => {
     cb(result);
   });
@@ -140,7 +140,7 @@ function pretendRegister(socket,email, pass, name, color, cb) {
     email:email,
     pass:pass,
     name:name,
-    color:color,
+    color:color
   }, (result) => {
     if(!result) {
      return alert("เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง.");
