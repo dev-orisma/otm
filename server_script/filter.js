@@ -125,7 +125,7 @@ module.exports = function (socket,db) {
 			"u.Name as name," +
 			"u.Avatar as avatar," +
 			"u.Color as color," +
-			"status," +
+			(data.filter.status.length ? "status," : "")+
 			"COLLECT(tags) as tags," +
 			"count(ID(t)) AS count " +
 			"SKIP 0 LIMIT 30";

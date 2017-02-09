@@ -125,6 +125,8 @@ class Project extends Component {
             scrollStatus: "stop",
             preventLoop: 0,
             preventLoopTimeout: null,
+            task_editing : false,
+            notic_update : false
         }
     };
     closeTaskDetail() {
@@ -189,6 +191,10 @@ class Project extends Component {
                 lastChild = this.state.taskChild[ref_array_id][this.state.taskChild[ref_array_id].length - 1];
             }
             this.addTaskLv1(this.state.projectId, ref_parent, lastChild, data);
+        }
+        this.setState({task_editing: false});
+        if (this.state.notic_update == true) {
+            this.loadTaskData();
         }
     }
     addTaskLv1(projectId, parent, after, header) {
@@ -318,7 +324,7 @@ class Project extends Component {
             //console.log(2,parent);
         }
         //console.log(this.state.addPreview);
-        this.setState({addPreview: this.state.addPreview});
+        this.setState({addPreview: this.state.addPreview,task_editing: true});
     }
     dropElement() {
         clearTimeout(this.state.tempDragZoneAction);
@@ -420,13 +426,17 @@ class Project extends Component {
     }
     loadTaskData() {
         //console.log("load data>>",this.props.socket, this.state.projectId, this.state.taskIndex);
-        TaskModule.loadTaskList(this.props.socket, this.state.projectId, this.state.taskIndex, (rs)=> {
-            if (!rs) {
-                return Materialize.toast("Error", 4000)
-            } else {
-                this.definedTask(rs);
-            }
-        });
+        if (this.state.task_editing == false) {
+            TaskModule.loadTaskList(this.props.socket, this.state.projectId, this.state.taskIndex, (rs)=> {
+                if (!rs) {
+                    return Materialize.toast("Error", 4000)
+                } else {
+                    this.definedTask(rs);
+                }
+            });
+        } else {
+            this.state.notic_update = true;
+        }
     }
     updateScrollStatus(status) {
         this.state.scrollStatus = status;
@@ -1171,7 +1181,7 @@ class TaskLevel2 extends Component {
                         </div>
                             :null}
                         <div className="due_date">
-                            {this.dateFormat(this.props.taskData.endDate)}
+                            Due Date: {this.dateFormat(this.props.taskData.endDate)}
                         </div>
                         {typeof(this.props.taskData.tag) != "undefined" && this.props.taskData.tag.length > 0 ?
                             <div className="task_label">
