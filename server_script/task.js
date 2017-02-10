@@ -408,7 +408,7 @@ module.exports = function (socket,db) {
 
 	socket.on('task:listByProject',function(data,rs){
 		db.cypher({
-			query:"MATCH (p:Projects)<-[:LIVE_IN]-(t:Tasks) WHERE ID(p) = "+data.pid+" and t.type <> 'container' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u)",
+			query:"MATCH (p:Projects)<-[:LIVE_IN]-(t:Tasks) WHERE ID(p) = "+data.pid+" and t.type <> 'container' and t.status <> 'archive' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u)",
 		},function(err,results){
 			if (err) console.log(err);
 			var res = [];
