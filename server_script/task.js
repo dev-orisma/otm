@@ -407,17 +407,31 @@ module.exports = function (socket,db) {
 	});
 
 	socket.on('task:listByProject',function(data,rs){
+		var query = "MATCH (p:Projects)<-[:LIVE_IN]-(t:Tasks) WHERE ID(p) = "+data.pid+" AND t.type <> 'container'"+
+			" OPTIONAL MATCH (m:Tasks)<-[:PARENT*0..]-(t) WHERE m.type='container'"+
+			" OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) "+
+			" RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u),COLLECT(m.title) as parent";
+		console.log(query);
 		db.cypher({
-			query:'MATCH (p:Projects)<-[:PARENT]-(x:Tasks)<-[l:PARENT]-(t:Tasks) WHERE ID(p) = '+data.pid+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u)',
+			query: query,
 		},function(err,results){
 			if (err) console.log(err);
 			var res = [];
 			if(results){
 				results.forEach(function(item,index){
+					var parent_name = "";
+					if (item['parent'].length > 0) {
+						var old_sort = item['parent'];
+						var new_sort = [];
+						while (old_sort.length > 0) {
+							new_sort.push(old_sort.pop());
+						}
+						parent_name = "["+new_sort.join(',')+"]";
+					}
 					res.push({
 						group:item['ID(u)'],
 						id:item['ID(t)'],
-						title:item['t.title'],
+						title:parent_name+item['t.title'],
 						start_time:item['t.startDate'],
 						end_time:item['t.endDate'],
 						status:item['t.status']
