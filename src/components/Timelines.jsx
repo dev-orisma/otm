@@ -3,10 +3,8 @@ import {Link} from 'react-router'
 import auth from './Module/Auth'
 import Timeline from 'react-calendar-timeline'
 import moment from 'moment'
-import CM from './Module/Carlenda'
+import CM from './Module/Calendar'
 var _ = require('lodash')
-
-
 
 
 class Timelines extends Component {
@@ -49,11 +47,12 @@ class Timelines extends Component {
 			currentPid:0})
 	}
 
-	selectProject(item){ 
+	selectProject(item){
 		CM.listTask(this.props.socket,item.d.id,(rs)=>{
 			if(!rs){
-
-			}else{
+        console.error("listTask: " ,rs);
+      }else{
+        console.log("listTask: " ,rs);
 				var ac = [],uc = []
 				rs.forEach(function(v,i){
 					ac.push({
@@ -79,7 +78,7 @@ class Timelines extends Component {
 				}
 				return 0;
 			});
-	 
+
 			this.setState({currentPid:item.d.id,userList:item.m,taskAssignList:ac})
 
 		})
@@ -95,9 +94,9 @@ class Timelines extends Component {
 
 	}
 	resizeItem(id,time, newGroupOrder,data,inx){
-		
-		let ac = Object.assign([], this.state.taskAssignList) 
-		ac[inx] = data 
+
+		let ac = Object.assign([], this.state.taskAssignList)
+		ac[inx] = data
 		this.setState({taskAssignList:ac})
 		CM.changeEndTime(this.props.socket,this.state.currentPid,id,time,(rs)=>{
 			if(!rs){
@@ -114,32 +113,32 @@ class Timelines extends Component {
 			return "btn-select-project"
 		}
 	}
-	moveItem(itemId, dragTime, newGroupOrder,data,inx){ 
-		let ac = Object.assign([], this.state.taskAssignList) 
-		ac[inx] = data 
+	moveItem(itemId, dragTime, newGroupOrder,data,inx){
+		let ac = Object.assign([], this.state.taskAssignList)
+		ac[inx] = data
 		this.setState({taskAssignList:ac})
 		CM.changePosition(this.props.socket,this.state.currentPid,itemId,data.start_time,data.end_time,data.group,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}
 		})
-	} 
+	}
 
 	render() {
-		var items = this.state.projectList 
+		var items = this.state.projectList
 		return (
 			<div>
 				<div id="project-list">
 				<div id="btn-all-project">All Projects</div>
 				{ items.map((item, i) =>
-					<div className={this.activeProject(item.d.id)} onClick={this.selectProject.bind(this,item)} key={"list-project-"+i}><i className="material-icons tiny">library_books</i> {item.d.title}</div>
+					<div className={this.activeProject(item.d.id)} onClick={this.selectProject.bind(this,item)} key={"list-project-"+i}><i className="material-icons tiny">library_books</i> <Link to={"/project/"+item.d.id}>{item.d.title}</Link> </div>
 					)}
 				</div>
 
 				<Timeline groups={this.state.userList}
 				items={this.state.taskAssignList}
 				defaultTimeStart={moment().add(-7, 'day')}
-				defaultTimeEnd={moment().add(7, 'day')} 
+				defaultTimeEnd={moment().add(7, 'day')}
 				onItemResize={this.resizeItem.bind(this)}
 				onItemMove={this.moveItem.bind(this)}
 				stackItems={true}

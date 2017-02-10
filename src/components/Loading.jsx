@@ -4,7 +4,7 @@ class Loading extends Component {
 		super(props)
 		this.state = {
 			error: false,
-			loading: this.props.loading,
+			loading: this.props.loading
 		}
 	}
 	render() {

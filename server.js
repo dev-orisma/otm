@@ -6,6 +6,7 @@ var PORT = process.env.PORT || 80;
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var socket = require('./socket');
+
 // using webpack-dev-server and middleware in development environment
 if (process.env.NODE_ENV !== 'production') {
   var webpackDevMiddleware = require('webpack-dev-middleware');

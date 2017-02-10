@@ -15,13 +15,13 @@ class Avatar extends Component {
         var first_two_char = "";
         var color = "";
         var avatar = "";
-        if (typeof(this.props.name) != "undefined" && this.props.name != null) {
+        if (typeof this.props.name != "undefined" && this.props.name != null) {
             name = this.props.name;
             first_two_char = name.substring(0,2).toUpperCase();
             avatar = this.props.avatar;
             color = this.props.color;
         }
-        if (typeof(this.props.avatar) != "undefined" && this.props.avatar != null && avatar.length > 0) {
+        if (typeof this.props.avatar != "undefined" && this.props.avatar != null && avatar.length > 0) {
             return (
                 <div className='user_display'>
                     <div className="user_tooltips" style={{display:this.state.userTooltipDisplay}}>

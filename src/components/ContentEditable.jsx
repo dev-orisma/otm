@@ -23,10 +23,10 @@ export default class ContentEditable extends React.Component {
 
     shouldComponentUpdate(nextProps) {
         return (
-            !this.htmlEl
-            || ( nextProps.html !== this.htmlEl.innerHTML
-            && nextProps.html !== this.props.html )
-            || this.props.disabled !== nextProps.disabled
+            !this.htmlEl ||
+            (nextProps.html !== this.htmlEl.innerHTML &&
+            nextProps.html !== this.props.html) ||
+            this.props.disabled !== nextProps.disabled
         );
     }
 
@@ -64,25 +64,24 @@ export default class ContentEditable extends React.Component {
     }
 
     linkify(inputText) {
-        if (typeof(inputText) == "string" && inputText != null) {
+        if (typeof inputText == "string" && inputText != null) {
             var replacedText, replacePattern1, replacePattern2, replacePattern3;
             replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
             replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
             replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
             replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
-            replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+            replacePattern3 = /(([a-zA-Z0-9\-_\.])+@[a-zA-Z_]+?(\.[a-zA-Z]{2,6})+)/gim;
             replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
             return replacedText;
         }
     }
 
     render() {
-        var {tagName, html, onChange, isReset, onReset, className, disabled, ...props} = this.props;
+        var { html, className } = this.props;
 
-        var htmlCache = this.state.htmlCache;
         return (
             <div>
-                <div ref={(e) => this.htmlEl = e} className={className}
+                <div ref={(e) => {this.htmlEl = e} } className={className}
                      onInput={this.emitChange.bind(this)}
                      onBlur={this.outBox.bind(this)}
                      onClick={this.activeBox.bind(this)}
