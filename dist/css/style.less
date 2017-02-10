@@ -446,6 +446,7 @@
 #menuPopup{
 	width: 300px;
 	margin-top: -12px;
+	display:inline-block;
 }
 .hiddenInput{
 	border:1px solid transparent;
@@ -697,6 +698,26 @@ hr{
 	}
 	&:hover{
 		text-decoration: underline;
+	}
+}
+.containerCheck {
+	padding: 5px;
+	color: #525252;
+	cursor: pointer;
+	.checkItem{
+		float: left;
+		width: 18px;
+		height: 18px;
+		background: #eee;
+		border-radius: 50%;
+		margin-right: 10px;
+		border: 2px solid #ccc;
+		margin-top: 2px;
+	}
+	&.success{
+		.checkItem{
+			background: green;
+		}
 	}
 }
 
@@ -1034,6 +1055,7 @@ hr{
  		}
  	}
  }
+
  .coloTag{
  	opacity: 0;
  	width: 10px;
@@ -1051,6 +1073,29 @@ hr{
  	// 	width: 15px;
  	// 	height: 15px;
  	// }
+ }
+ .head2 {
+	 margin-top:10px;
+ }
+ .color_head {
+	 display: inline-block;
+	 .headColor {
+		 width: 10px;
+		 height: 10px;
+		 border-radius: 50%;
+		 display: inline-block;
+		 margin-left: 5px;
+		 cursor: pointer;
+
+		 &.active{
+			 width: 15px;
+			 height: 15px;
+		 }
+		 // &:hover{
+		 // 	width: 15px;
+		 // 	height: 15px;
+		 // }
+	 }
  }
  .tagColorExample{
  	margin-right:5px;
@@ -1469,6 +1514,9 @@ hr{
 }
 .black_tag {
 	background-color: #000;
+}
+.dark_gray_tag {
+	background-color: #333;
 }
 .color_preview {
 

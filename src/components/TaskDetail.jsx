@@ -38,7 +38,9 @@ class TaskDetail extends Component {
             showTag: false,
             loading: true,
             task_status: "active",
-            editDetail: false
+            editDetail: false,
+            color : "",
+            type : "",
         }
         this._hideDropdown = this._hideDropdown.bind(this);
         this.onDrop = this.onDrop.bind(this);
@@ -61,6 +63,8 @@ class TaskDetail extends Component {
                     var {taskData} = this.state
                     taskData = rs[0]
                     this.setState({task_status: rs[0]["t.status"]});
+                    this.setState({color: rs[0]["t.color"]});
+                    this.setState({type: rs[0]["t.type"]});
                     this.setState({taskData, projectId: rs[0]["ID(p)"]})
                     var projectId = rs[0]["ID(p)"];
                     if (rs[0]['todo'] > 0) {
@@ -217,6 +221,32 @@ class TaskDetail extends Component {
         })
     }
 
+    setColor(color) {
+        console.log(color);
+        Tasks.setColor(this.state.socket, this.state.taskId, color, (rs)=> {
+            if (!rs) {
+                return Materialize.toast("เกิดข้อผิดพลาด กรุณารีเฟรสหน้าใหม่", 4000)
+            } else {
+                this.setState({color:color})
+            }
+        })
+    }
+    setType() {
+        var send_type;
+        if (this.state.type == "container") {
+            send_type = "task"
+        } else {
+            send_type = "container"
+        }
+        console.log(send_type);
+        Tasks.setType(this.state.socket, this.state.taskId, send_type, (rs)=> {
+            if (!rs) {
+                return Materialize.toast("เกิดข้อผิดพลาด กรุณารีเฟรสหน้าใหม่", 4000)
+            } else {
+                this.setState({type:send_type})
+            }
+        })
+    }
     selectEndDate(data) {
         var tm = moment(data).valueOf()
         Tasks.changeEndDate(this.state.socket, this.state.taskId, tm, (rs)=> {
@@ -421,13 +451,26 @@ class TaskDetail extends Component {
     }
 
     render() {
+        var colors = ["purple_tag","pink_tag","red_tag","orange_tag","yellow_tag","green_tag","blue_tag","black_tag","dark_gray_tag"]
         return (
             <div style={{display: this.checkTaskId()}}>
                 <div id="inner" className="element-animation">
                     {this.closeTaskDetail()}
-                    <div id="menuPopup">
-                        <StatusAction status={this.state.task_status} changeStatus={this.statusTask.bind(this)}/>
+                    <div className="head1">
+                        <div id="menuPopup">
+                            <StatusAction status={this.state.task_status} changeStatus={this.statusTask.bind(this)}/>
+                        </div>
+                        <div className="color_head">
+                            {
+                                colors.map((color,c)=>
+                                    <div className={"headColor "+color+(color == this.state.color ? " active":"")} key={"color-"+c} onClick={this.setColor.bind(this,color)}></div>
+                                )
+                            }
+                        </div>
                     </div>
+                   <div className={"containerCheck"+(this.state.type == "container" ? " success":"")} onClick={this.setType.bind(this)}>
+                       <div className="checkItem"></div>Container
+                   </div>
                     <div className="clear"></div>
                     <hr/>
                     <div className="row">

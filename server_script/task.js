@@ -26,6 +26,8 @@ module.exports = function (socket,db) {
 			"t.endDate as endDate," +
 			"t.detail as detail," +
 			"t.status as status," +
+			"t.color as color," +
+			"t.type as type," +
 			"COUNT(tc) as child_count," +
 			"ID(nt) as next," +
 			"tag as tag," +
@@ -40,6 +42,8 @@ module.exports = function (socket,db) {
 				"endDate:tc.endDate," +
 				"detail:tc.detail," +
 				"status:tc.status," +
+				"color:tc.color," +
+				"type:tc.type," +
 				"next:ID(ntc)," +
 				"tag:c_tag," +
 				"child_count:child_count}" +
@@ -265,7 +269,32 @@ module.exports = function (socket,db) {
 			if (err) {
 				console.log(err);
 			} else {
-				console.log(results);
+				rs(results);
+			}
+		});
+	});
+	socket.on("task:setColor",function(data,rs) {
+		var query = "MATCH (ct:Tasks) WHERE ID(ct) = "+data.tid+" SET ct.color='"+data.color+"'";
+		console.log("\n======== Set Color Query =========\n"+query+"\n============================\n");
+		db.cypher({
+			query:query
+		},function(err,results) {
+			if (err) {
+				console.log(err);
+			} else {
+				rs(results);
+			}
+		});
+	});
+	socket.on("task:setType",function(data,rs) {
+		var query = "MATCH (ct:Tasks) WHERE ID(ct) = "+data.tid+" SET ct.type='"+data.type+"'";
+		console.log("\n======== Set Type Query =========\n"+query+"\n============================\n");
+		db.cypher({
+			query:query
+		},function(err,results) {
+			if (err) {
+				console.log(err);
+			} else {
 				rs(results);
 			}
 		});
@@ -490,7 +519,7 @@ module.exports = function (socket,db) {
 			'OPTIONAL MATCH (ua:Users)-[:Assigned]->(t) ' +
 			'WHERE ID(ua) <> 0 AND ID(t) = '+data.tid+'  ' +
 			'OPTIONAL MATCH (td:Todos)-[:IN]->(t) ' +
-			'RETURN t.title,t.detail,t.startDate,t.endDate,t.status,uc.Name,uc.Avatar,uc.Color,ua.Name,ua.Avatar,ua.Color,ID(ua),COUNT(distinct td) AS todo, t.cid,ID(p),p.title';
+			'RETURN t.title,t.detail,t.startDate,t.endDate,t.status,t.color,t.type,uc.Name,uc.Avatar,uc.Color,ua.Name,ua.Avatar,ua.Color,ID(ua),COUNT(distinct td) AS todo, t.cid,ID(p),p.title';
 		console.log("\n=============Query Task Data===========\n"+query)+"\n==========================\n";
 		db.cypher({
 			query:query,
@@ -578,7 +607,6 @@ module.exports = function (socket,db) {
 			}
 		})
 	});
-
 	socket.on('task:changeTaskStatus',function(data,rs) {
 		console.log(data);
 		var query="";
