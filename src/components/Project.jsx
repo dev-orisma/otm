@@ -893,7 +893,7 @@ class TaskLevel1 extends Component {
                 }}>
                     <div className="task_cell_fixed">
                         <div className="task_level1">
-                            <div className="task_header"
+                            <div className={"task_header"+(this.props.taskData[this.props.taskId].color != null? " "+this.props.taskData[this.props.taskId].color:" dark_gray_tag")}
                                  onMouseDown={this.addMoveAble.bind(this)}
                                  onMouseUp={this.removeMoveAble.bind(this)} ref={(cardHeader) => {
                                 this.cardHeader = cardHeader
@@ -912,7 +912,7 @@ class TaskLevel1 extends Component {
                             <div className="task_child">
                                 <Scrollbars onScrollStart={this.updateScroll.bind(this,"start")} onScrollStop={this.updateScroll.bind(this,"stop")}
                                     className="scrollTaskList">
-                                    {this.props.parent != "root" ?
+                                    {this.props.parent != "root" && this.props.taskData[this.props.taskId].type != "container" ?
                                         <div className="task_detail">
                                             {this.props.taskData[this.props.taskId].a_id != 0 || (typeof(this.props.taskData[this.props.taskId].detail) != "undefined" && this.props.taskData[this.props.taskId].detail != null && this.props.taskData[this.props.taskId].detail.length > 0) ?
                                                 <div className="task_2_detail">

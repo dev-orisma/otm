@@ -109,6 +109,26 @@ module.exports = {
 			}
 		});
 	},
+	setColor(socket,tid,color,cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:setColor', {tid:tid,color:color}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	setType(socket,tid,type,cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:setType', {tid:tid,type:type}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
 	get(socket,pid,tid,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:get', {pid:pid,tid:tid}, (result) => {
